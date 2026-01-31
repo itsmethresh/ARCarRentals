@@ -1,11 +1,19 @@
 import { createBrowserRouter, type RouteObject } from 'react-router-dom';
-import { MainLayout } from '@components/layout';
+import { MainLayout, AdminLayout } from '@components/layout';
 import {
   LandingPage,
   NotFoundPage,
   FeaturesPage,
   PricingPage,
   ResourcesPage,
+  LoginPage,
+  RegisterPage,
+  AdminDashboardPage,
+  AdminFleetPage,
+  AdminBookingsPage,
+  AdminCustomersPage,
+  AdminDriversPage,
+  CustomerDashboardPage,
 } from '@pages/index';
 
 /**
@@ -27,6 +35,32 @@ export const routes: RouteObject[] = [
   {
     path: '/resources',
     element: <MainLayout><ResourcesPage /></MainLayout>,
+  },
+  {
+    path: '/login',
+    element: <LoginPage />,
+  },
+  {
+    path: '/register',
+    element: <RegisterPage />,
+  },
+  {
+    path: '/customer',
+    element: <AdminLayout />,
+    children: [
+      { path: 'dashboard', element: <CustomerDashboardPage /> },
+    ],
+  },
+  {
+    path: '/admin',
+    element: <AdminLayout />,
+    children: [
+      { path: 'dashboard', element: <AdminDashboardPage /> },
+      { path: 'fleet', element: <AdminFleetPage /> },
+      { path: 'bookings', element: <AdminBookingsPage /> },
+      { path: 'customers', element: <AdminCustomersPage /> },
+      { path: 'drivers', element: <AdminDriversPage /> },
+    ],
   },
   {
     path: '*',

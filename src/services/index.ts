@@ -1,3 +1,8 @@
 export { apiClient, get, post, put, patch, del, apiRequest } from './api';
 export { carService } from './carService';
 export { bookingService } from './bookingService';
+export { supabase } from './supabase';
+export { authService } from './authService';
+export { databaseService } from './databaseService';
+export { driverService } from './driverService';
+export type { Driver, DriverStats } from './driverService';

@@ -124,9 +124,21 @@ export const Header: FC = () => {
             </div>
 
             {/* Desktop CTA */}
-            <div className="hidden md:block">
-              <Button variant="primary" size="sm">
-                Log In
+            <div className="hidden md:flex items-center gap-3">
+              <Link to="/login">
+                <Button variant="outline" size="sm">
+                  Log In
+                </Button>
+              </Link>
+              <Button 
+                variant="primary" 
+                size="sm"
+                onClick={() => {
+                  const searchForm = document.querySelector('form');
+                  searchForm?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
+                Book Now
               </Button>
             </div>
 
@@ -171,9 +183,22 @@ export const Header: FC = () => {
                     {item.label}
                   </NavLink>
                 ))}
-                <div className="mt-2 px-4">
-                  <Button variant="primary" fullWidth>
-                    Log In
+                <div className="mt-2 px-4 space-y-2">
+                  <Link to="/login" onClick={closeMobileMenu}>
+                    <Button variant="outline" fullWidth>
+                      Log In
+                    </Button>
+                  </Link>
+                  <Button 
+                    variant="primary" 
+                    fullWidth
+                    onClick={() => {
+                      closeMobileMenu();
+                      const searchForm = document.querySelector('form');
+                      searchForm?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                  >
+                    Book Now
                   </Button>
                 </div>
               </div>
