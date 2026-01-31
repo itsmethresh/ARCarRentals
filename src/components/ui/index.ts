@@ -16,3 +16,4 @@ export { AddCustomerModal } from './AddCustomerModal';
 export { EditCustomerModal } from './EditCustomerModal';
 export { AddDriverModal } from './AddDriverModal';
 export { EditDriverModal } from './EditDriverModal';
+export { BookNowModal } from './BookNowModal';

@@ -3,7 +3,7 @@ import { Link, NavLink } from 'react-router-dom';
 import { Menu, X, Facebook, Instagram, Twitter, Clock, MapPin } from 'lucide-react';
 import { cn } from '@utils/helpers';
 import { config } from '@utils/config';
-import { Button, Container } from '@components/ui';
+import { Button, Container, BookNowModal } from '@components/ui';
 import { useScroll, useIsMobile } from '@hooks/index';
 
 interface NavItem {
@@ -74,6 +74,7 @@ const TopBar: FC = () => (
  */
 export const Header: FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isBookNowModalOpen, setIsBookNowModalOpen] = useState(false);
   const { isScrolled } = useScroll({ threshold: 50 });
   const isMobile = useIsMobile();
 
@@ -101,7 +102,7 @@ export const Header: FC = () => {
                 <span className="text-white font-bold text-lg">AR</span>
               </div>
               <span className="font-bold text-lg text-neutral-900">
-                AR CAR RENTALS
+                AR CAR RENTAL SERVICES
               </span>
             </Link>
 
@@ -133,10 +134,7 @@ export const Header: FC = () => {
               <Button 
                 variant="primary" 
                 size="sm"
-                onClick={() => {
-                  const searchForm = document.querySelector('form');
-                  searchForm?.scrollIntoView({ behavior: 'smooth' });
-                }}
+                onClick={() => setIsBookNowModalOpen(true)}
               >
                 Book Now
               </Button>
@@ -194,8 +192,7 @@ export const Header: FC = () => {
                     fullWidth
                     onClick={() => {
                       closeMobileMenu();
-                      const searchForm = document.querySelector('form');
-                      searchForm?.scrollIntoView({ behavior: 'smooth' });
+                      setIsBookNowModalOpen(true);
                     }}
                   >
                     Book Now
@@ -206,6 +203,12 @@ export const Header: FC = () => {
           )}
         </Container>
       </nav>
+
+      {/* Book Now Modal */}
+      <BookNowModal
+        isOpen={isBookNowModalOpen}
+        onClose={() => setIsBookNowModalOpen(false)}
+      />
     </header>
   );
 };

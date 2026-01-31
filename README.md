@@ -1,4 +1,4 @@
-# AR Car Rentals
+# AR Car Rental Services
 
 A production-ready React website for car rental and tour services in Cebu City, built with Vite, TypeScript, and Tailwind CSS.
 

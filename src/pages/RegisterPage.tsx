@@ -177,7 +177,7 @@ export const RegisterPage: FC = () => {
                 <Car className="h-8 w-8 text-white" />
               </div>
               <span className="font-bold text-xl text-white tracking-wide">
-                AR CAR RENTALS
+                AR CAR RENTAL SERVICES
               </span>
             </Link>
             <h1 className="text-3xl font-bold text-white mb-2">

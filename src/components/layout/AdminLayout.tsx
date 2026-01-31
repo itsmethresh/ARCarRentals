@@ -53,7 +53,7 @@ export const AdminLayout: FC = () => {
             <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-primary-600">
               <Car className="h-6 w-6 text-white" />
             </div>
-            <span className="font-bold text-lg text-white">AR Car Rentals</span>
+            <span className="font-bold text-lg text-white">AR Car Rental Services</span>
           </div>
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -87,7 +87,7 @@ export const AdminLayout: FC = () => {
           </div>
           {isSidebarOpen && (
             <div className="overflow-hidden">
-              <span className="font-bold text-white text-lg whitespace-nowrap">AR Car Rentals</span>
+              <span className="font-bold text-white text-lg whitespace-nowrap">AR Car Rental Services</span>
               <p className="text-neutral-500 text-xs">Admin Panel</p>
             </div>
           )}

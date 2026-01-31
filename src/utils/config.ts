@@ -4,7 +4,7 @@
  */
 export const config = {
   app: {
-    name: import.meta.env.VITE_APP_NAME || 'AR Car Rentals',
+    name: import.meta.env.VITE_APP_NAME || 'AR Car Rental Services',
     version: import.meta.env.VITE_APP_VERSION || '1.0.0',
   },
   api: {

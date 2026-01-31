@@ -42,7 +42,7 @@ export const Footer: FC = () => {
                 <div className="flex items-center justify-center h-10 w-10 rounded-full bg-primary-600">
                   <span className="text-white font-bold text-lg">AR</span>
                 </div>
-                <span className="font-bold text-lg">AR CAR RENTALS</span>
+                <span className="font-bold text-lg">AR CAR RENTAL SERVICES</span>
               </Link>
               <p className="text-neutral-400 text-sm mb-6 max-w-xs">
                 Your trusted partner for car rental and tour services in Cebu City.

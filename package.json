@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "AR Car Rentals - Premium car rental and tour services in Cebu City",
+  "description": "AR Car Rental Services - Premium car rental and tour services in Cebu City",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

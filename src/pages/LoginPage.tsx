@@ -108,7 +108,7 @@ export const LoginPage: FC = () => {
                 <Car className="h-9 w-9 text-white" />
               </div>
               <span className="font-bold text-2xl text-white tracking-wide">
-                AR CAR RENTALS
+                AR CAR RENTAL SERVICES
               </span>
             </Link>
             
@@ -157,7 +157,7 @@ export const LoginPage: FC = () => {
                   <Car className="h-8 w-8 text-white" />
                 </div>
                 <span className="font-bold text-xl text-white tracking-wide">
-                  AR CAR RENTALS
+                  AR CAR RENTAL SERVICES
                 </span>
               </Link>
             </div>

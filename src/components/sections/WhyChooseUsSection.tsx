@@ -42,7 +42,7 @@ export const WhyChooseUsSection: FC = () => {
           {/* Left Content */}
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">
-              Why Choose AR Car Rentals?
+              Why Choose AR Car Rental Services?
             </h2>
             <p className="text-neutral-600 mb-8">
               With over 5 years of experience serving travelers in Cebu City, we've built a reputation for reliability, quality, and exceptional customer service.
