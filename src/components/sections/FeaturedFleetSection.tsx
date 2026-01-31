@@ -1,0 +1,241 @@
+import type { FC } from 'react';
+import { Link } from 'react-router-dom';
+import { Users, Fuel, Settings2, ArrowRight } from 'lucide-react';
+import { Container, Card, Badge, Button } from '@components/ui';
+import { formatCurrency } from '@utils/helpers';
+import type { Car } from '@/types';
+
+// Sample car data based on UI
+const featuredCars: Car[] = [
+  {
+    id: '1',
+    name: 'Toyota Vios',
+    brand: 'Toyota',
+    model: 'Vios',
+    year: 2024,
+    category: 'economy',
+    pricePerDay: 1500,
+    currency: 'PHP',
+    seats: 4,
+    transmission: 'automatic',
+    fuelType: 'gasoline',
+    image: 'https://images.unsplash.com/photo-1619767886558-efdc259cde1a?w=400&q=80',
+    images: [],
+    features: ['AC', 'Bluetooth', 'USB Charging'],
+    available: true,
+    rating: 4.8,
+    reviewCount: 124,
+  },
+  {
+    id: '2',
+    name: 'Mitsubishi Montero',
+    brand: 'Mitsubishi',
+    model: 'Montero Sport',
+    year: 2024,
+    category: 'suv',
+    pricePerDay: 3500,
+    currency: 'PHP',
+    seats: 7,
+    transmission: 'automatic',
+    fuelType: 'diesel',
+    image: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=400&q=80',
+    images: [],
+    features: ['AC', 'Leather Seats', '4WD', 'Navigation'],
+    available: true,
+    rating: 4.9,
+    reviewCount: 89,
+  },
+  {
+    id: '3',
+    name: 'Toyota Grandia',
+    brand: 'Toyota',
+    model: 'Grandia',
+    year: 2024,
+    category: 'van',
+    pricePerDay: 4000,
+    currency: 'PHP',
+    seats: 12,
+    transmission: 'manual',
+    fuelType: 'diesel',
+    image: 'https://images.unsplash.com/photo-1559416523-140ddc3d238c?w=400&q=80',
+    images: [],
+    features: ['AC', 'Spacious', 'Perfect for Groups'],
+    available: true,
+    rating: 4.7,
+    reviewCount: 156,
+  },
+  {
+    id: '4',
+    name: 'Toyota Vios',
+    brand: 'Toyota',
+    model: 'Vios',
+    year: 2023,
+    category: 'economy',
+    pricePerDay: 1500,
+    currency: 'PHP',
+    seats: 5,
+    transmission: 'automatic',
+    fuelType: 'gasoline',
+    image: 'https://images.unsplash.com/photo-1619767886558-efdc259cde1a?w=400&q=80',
+    images: [],
+    features: ['AC', 'Bluetooth', 'USB Charging'],
+    available: true,
+    rating: 4.6,
+    reviewCount: 98,
+  },
+  {
+    id: '5',
+    name: 'Mitsubishi Montero',
+    brand: 'Mitsubishi',
+    model: 'Montero Sport',
+    year: 2023,
+    category: 'suv',
+    pricePerDay: 3500,
+    currency: 'PHP',
+    seats: 7,
+    transmission: 'automatic',
+    fuelType: 'diesel',
+    image: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=400&q=80',
+    images: [],
+    features: ['AC', 'Leather Seats', '4WD'],
+    available: true,
+    rating: 4.8,
+    reviewCount: 75,
+  },
+  {
+    id: '6',
+    name: 'Toyota Grandia',
+    brand: 'Toyota',
+    model: 'Grandia',
+    year: 2023,
+    category: 'van',
+    pricePerDay: 4000,
+    currency: 'PHP',
+    seats: 12,
+    transmission: 'manual',
+    fuelType: 'diesel',
+    image: 'https://images.unsplash.com/photo-1559416523-140ddc3d238c?w=400&q=80',
+    images: [],
+    features: ['AC', 'Spacious', 'Perfect for Groups'],
+    available: true,
+    rating: 4.7,
+    reviewCount: 112,
+  },
+];
+
+interface CarCardProps {
+  car: Car;
+}
+
+/**
+ * Individual car card component
+ */
+const CarCard: FC<CarCardProps> = ({ car }) => {
+  const badgeVariant = car.category as 'economy' | 'suv' | 'van' | 'luxury';
+
+  return (
+    <Card className="overflow-hidden group" hoverable>
+      {/* Car Image */}
+      <div className="relative h-48 bg-neutral-100 overflow-hidden">
+        <img
+          src={car.image}
+          alt={`${car.brand} ${car.model}`}
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          loading="lazy"
+        />
+        <Badge
+          variant={badgeVariant}
+          className="absolute top-3 right-3"
+        >
+          {car.category}
+        </Badge>
+      </div>
+
+      {/* Car Info */}
+      <div className="p-5">
+        <h3 className="font-semibold text-lg text-neutral-900 mb-3">
+          {car.name}
+        </h3>
+
+        {/* Specs */}
+        <div className="flex items-center gap-4 text-sm text-neutral-500 mb-4">
+          <div className="flex items-center gap-1.5">
+            <Users className="h-4 w-4" />
+            <span>{car.seats} Seats</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Settings2 className="h-4 w-4" />
+            <span className="capitalize">{car.transmission}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Fuel className="h-4 w-4" />
+            <span className="capitalize">{car.fuelType}</span>
+          </div>
+        </div>
+
+        {/* Price & CTA */}
+        <div className="flex items-center justify-between pt-4 border-t border-neutral-100">
+          <div>
+            <span className="text-2xl font-bold text-neutral-900">
+              {formatCurrency(car.pricePerDay, car.currency)}
+            </span>
+            <span className="text-neutral-500 text-sm">/day</span>
+          </div>
+          <Link
+            to={`/cars/${car.id}`}
+            className="text-primary-600 font-medium text-sm hover:text-primary-700 transition-colors inline-flex items-center gap-1"
+          >
+            View Details
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </div>
+    </Card>
+  );
+};
+
+/**
+ * Featured Fleet section
+ */
+export const FeaturedFleetSection: FC = () => {
+  return (
+    <section className="py-16 lg:py-24 bg-neutral-50">
+      <Container>
+        {/* Section Header */}
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-12">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-2">
+              Featured Fleet
+            </h2>
+            <p className="text-neutral-500">
+              Choose from our wide range of well-maintained vehicles.
+            </p>
+          </div>
+          <Link
+            to="/fleet"
+            className="text-primary-600 font-medium hover:text-primary-700 transition-colors inline-flex items-center gap-1"
+          >
+            View All Cars
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+
+        {/* Cars Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {featuredCars.map((car) => (
+            <CarCard key={car.id} car={car} />
+          ))}
+        </div>
+
+        {/* CTA */}
+        <div className="text-center mt-12">
+          <Button variant="outline" size="lg">
+            Browse All Vehicles
+          </Button>
+        </div>
+      </Container>
+    </section>
+  );
+};
+
+export default FeaturedFleetSection;
