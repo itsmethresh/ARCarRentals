@@ -1,9 +1,10 @@
-import { type FC, useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { type FC, useState, useEffect, useRef } from 'react';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Menu, X, Facebook, Instagram, Twitter, Clock, MapPin } from 'lucide-react';
+import { motion, useAnimationControls } from 'framer-motion';
 import { cn } from '@utils/helpers';
 import { config } from '@utils/config';
-import { Button, Container, BookNowModal } from '@components/ui';
+import { Button, BookNowModal } from '@components/ui';
 import { useScroll, useIsMobile } from '@hooks/index';
 
 interface NavItem {
@@ -13,59 +14,67 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: 'Home', href: '/' },
-  { label: 'Features', href: '/features' },
-  { label: 'Pricing', href: '/pricing' },
-  { label: 'Resources', href: '/resources' },
+  { label: 'Browse Vehicles', href: '/browsevehicles' },
+  { label: 'How to Rent', href: '/pricing' },
+  { label: 'About Us', href: '/resources' },
 ];
 
 /**
- * Top bar with contact info and social links
+ * Top bar with contact info and social links - 40px height, red gradient 40% width with slant
+ * Hidden on mobile devices
  */
 const TopBar: FC = () => (
-  <div className="bg-primary-600 py-2 text-white text-sm">
-    <Container>
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-4 sm:gap-6">
-          <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4" aria-hidden="true" />
-            <span>{config.contact.businessHours}</span>
-          </div>
-          <div className="hidden sm:flex items-center gap-2">
-            <MapPin className="h-4 w-4" aria-hidden="true" />
-            <span>{config.contact.location}</span>
-          </div>
+  <div className="relative h-[40px] bg-white overflow-hidden hidden lg:block">
+    {/* Red gradient section - wider width with subtle slant (bottom points outward) */}
+    <div 
+      className="absolute left-0 top-0 h-full w-[48%]"
+      style={{
+        background: 'linear-gradient(to right, #FB3030 0%, #480E0E 100%)',
+        clipPath: 'polygon(0 0, 96% 0, 100% 100%, 0 100%)',
+      }}
+    >
+      <div className="flex items-center h-full pl-6 lg:pl-12 xl:pl-[360px] gap-6 text-white text-sm font-medium">
+        <div className="flex items-center gap-2">
+          <Clock className="h-4 w-4" aria-hidden="true" />
+          <span className="whitespace-nowrap">{config.contact.businessHours}</span>
         </div>
-        <div className="flex items-center gap-4">
-          <a
-            href="https://facebook.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-white/80 transition-colors"
-            aria-label="Follow us on Facebook"
-          >
-            <Facebook className="h-4 w-4" />
-          </a>
-          <a
-            href="https://instagram.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-white/80 transition-colors"
-            aria-label="Follow us on Instagram"
-          >
-            <Instagram className="h-4 w-4" />
-          </a>
-          <a
-            href="https://twitter.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-white/80 transition-colors"
-            aria-label="Follow us on Twitter"
-          >
-            <Twitter className="h-4 w-4" />
-          </a>
+        <div className="flex items-center gap-2">
+          <MapPin className="h-4 w-4" aria-hidden="true" />
+          <span className="whitespace-nowrap">{config.contact.location}</span>
         </div>
       </div>
-    </Container>
+    </div>
+    
+    {/* Social icons on the right - black icons */}
+    <div className="absolute right-6 lg:right-12 xl:right-[360px] top-0 h-full flex items-center gap-4">
+      <a
+        href="https://facebook.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-black hover:text-[#E22B2B] transition-colors"
+        aria-label="Follow us on Facebook"
+      >
+        <Facebook className="h-4 w-4" />
+      </a>
+      <a
+        href="https://instagram.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-black hover:text-[#E22B2B] transition-colors"
+        aria-label="Follow us on Instagram"
+      >
+        <Instagram className="h-4 w-4" />
+      </a>
+      <a
+        href="https://twitter.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-black hover:text-[#E22B2B] transition-colors"
+        aria-label="Follow us on Twitter"
+      >
+        <Twitter className="h-4 w-4" />
+      </a>
+    </div>
   </div>
 );
 
@@ -77,45 +86,116 @@ export const Header: FC = () => {
   const [isBookNowModalOpen, setIsBookNowModalOpen] = useState(false);
   const { isScrolled } = useScroll({ threshold: 50 });
   const isMobile = useIsMobile();
+  const location = useLocation();
+  
+  // Check if we're on the browse vehicles page
+  const isBrowseVehiclesPage = location.pathname === '/browsevehicles';
+  
+  // Animation controls for header visibility
+  const controls = useAnimationControls();
+  const lastScrollY = useRef(0);
+  const isHidden = useRef(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const scrollingUp = currentScrollY < lastScrollY.current;
+      
+      // At top of page - always show header
+      if (currentScrollY <= 50) {
+        if (isHidden.current) {
+          isHidden.current = false;
+          controls.start({
+            y: 0,
+            transition: { duration: 0.5, ease: 'easeOut' }
+          });
+        }
+      } 
+      // Scrolling up - show header
+      else if (scrollingUp && isHidden.current) {
+        isHidden.current = false;
+        controls.start({
+          y: 0,
+          transition: { duration: 0.5, ease: 'easeOut' }
+        });
+      } 
+      // Scrolling down - hide header
+      else if (!scrollingUp && !isHidden.current && currentScrollY > 50) {
+        isHidden.current = true;
+        controls.start({
+          y: -120, // Hide header (TopBar 40px + Nav 80px)
+          transition: { duration: 0.6, ease: 'easeInOut' }
+        });
+      }
+      
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [controls]);
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
+  // Handle Book Now click based on current page
+  const handleBookNowClick = () => {
+    if (isBrowseVehiclesPage) {
+      // Scroll to cars section on browse vehicles page
+      const carsSection = document.getElementById('cars-section');
+      if (carsSection) {
+        carsSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      // Open modal on other pages (like landing page)
+      setIsBookNowModalOpen(true);
+    }
+  };
+
   return (
-    <header className="sticky top-0 z-50">
+    <motion.header 
+      className="fixed top-0 left-0 right-0 z-50 bg-[#121212]"
+      initial={{ y: 0 }}
+      animate={controls}
+    >
       <TopBar />
       <nav
         className={cn(
-          'bg-white transition-shadow duration-300',
+          'bg-[#121212] transition-shadow duration-300 h-[80px]',
           isScrolled && 'shadow-md'
         )}
       >
-        <Container>
-          <div className="flex h-16 items-center justify-between">
+        <div className="h-full px-4 sm:px-6 lg:px-12 xl:px-[360px]">
+          <div className="flex h-full items-center justify-between">
             {/* Logo */}
             <Link
               to="/"
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 sm:gap-3"
               onClick={closeMobileMenu}
             >
-              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-primary-600">
-                <span className="text-white font-bold text-lg">AR</span>
-              </div>
-              <span className="font-bold text-lg text-neutral-900">
-                AR CAR RENTAL SERVICES
+              <img 
+                src="/ARCarRentals.png" 
+                alt="AR Car Rentals Logo" 
+                className="h-10 sm:h-14 w-auto"
+              />
+              <span className="font-semibold text-sm sm:text-lg text-white tracking-wide">
+                AR CAR RENTALS
               </span>
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-8">
+            <div className="hidden md:flex items-center gap-10">
               {navItems.map((item) => (
                 <NavLink
                   key={item.href}
                   to={item.href}
                   className={({ isActive }) =>
                     cn(
-                      'font-medium transition-colors hover:text-primary-600',
-                      isActive ? 'text-primary-600' : 'text-neutral-700'
+                      'font-medium text-[15px] transition-colors hover:text-white',
+                      isActive ? 'text-white' : 'text-neutral-300'
                     )
                   }
                 >
@@ -125,24 +205,20 @@ export const Header: FC = () => {
             </div>
 
             {/* Desktop CTA */}
-            <div className="hidden md:flex items-center gap-3">
-              <Link to="/login">
-                <Button variant="outline" size="sm">
-                  Log In
-                </Button>
-              </Link>
+            <div className="hidden md:flex items-center">
               <Button 
                 variant="primary" 
-                size="sm"
-                onClick={() => setIsBookNowModalOpen(true)}
+                size="md"
+                onClick={handleBookNowClick}
+                className="bg-[#E22B2B] hover:bg-[#c92525] border-none rounded-md px-6 font-medium"
               >
-                Book Now
+                {isBrowseVehiclesPage ? 'View Cars' : 'Book Now'}
               </Button>
             </div>
 
             {/* Mobile Menu Button */}
             <button
-              className="md:hidden p-2 text-neutral-700 hover:text-primary-600 transition-colors"
+              className="md:hidden p-2 text-white hover:text-[#E22B2B] transition-colors"
               onClick={toggleMobileMenu}
               aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={isMobileMenuOpen}
@@ -159,11 +235,11 @@ export const Header: FC = () => {
           {isMobile && (
             <div
               className={cn(
-                'md:hidden overflow-hidden transition-all duration-300',
+                'md:hidden overflow-hidden transition-all duration-300 bg-[#121212]',
                 isMobileMenuOpen ? 'max-h-96 pb-4' : 'max-h-0'
               )}
             >
-              <div className="flex flex-col gap-2 pt-4 border-t border-neutral-200">
+              <div className="flex flex-col gap-2 pt-4 border-t border-neutral-800">
                 {navItems.map((item) => (
                   <NavLink
                     key={item.href}
@@ -173,35 +249,31 @@ export const Header: FC = () => {
                       cn(
                         'px-4 py-2 rounded-lg font-medium transition-colors',
                         isActive
-                          ? 'bg-primary-50 text-primary-600'
-                          : 'text-neutral-700 hover:bg-neutral-50'
+                          ? 'bg-[#E22B2B]/10 text-[#E22B2B]'
+                          : 'text-neutral-300 hover:bg-neutral-800'
                       )
                     }
                   >
                     {item.label}
                   </NavLink>
                 ))}
-                <div className="mt-2 px-4 space-y-2">
-                  <Link to="/login" onClick={closeMobileMenu}>
-                    <Button variant="outline" fullWidth>
-                      Log In
-                    </Button>
-                  </Link>
+                <div className="mt-2 px-4">
                   <Button 
                     variant="primary" 
                     fullWidth
                     onClick={() => {
                       closeMobileMenu();
-                      setIsBookNowModalOpen(true);
+                      handleBookNowClick();
                     }}
+                    className="bg-[#E22B2B] hover:bg-[#c92525] border-none"
                   >
-                    Book Now
+                    {isBrowseVehiclesPage ? 'View Cars' : 'Book Now'}
                   </Button>
                 </div>
               </div>
             </div>
           )}
-        </Container>
+        </div>
       </nav>
 
       {/* Book Now Modal */}
@@ -209,7 +281,7 @@ export const Header: FC = () => {
         isOpen={isBookNowModalOpen}
         onClose={() => setIsBookNowModalOpen(false)}
       />
-    </header>
+    </motion.header>
   );
 };
 

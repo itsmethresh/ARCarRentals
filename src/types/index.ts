@@ -19,7 +19,7 @@ export interface Car {
   reviewCount: number;
 }
 
-export type CarCategory = 'economy' | 'suv' | 'van' | 'luxury' | 'sports';
+export type CarCategory = 'sedan' | 'suv' | 'van';
 
 export type TransmissionType = 'automatic' | 'manual';
 

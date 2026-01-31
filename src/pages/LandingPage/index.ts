@@ -1,0 +1,9 @@
+export { HeroSection } from './HeroSection';
+export { TestimonialsSection } from './TestimonialsSection';
+export { FeaturedFleetSection } from './FeaturedFleetSection';
+export { WhyChooseUsSection } from './WhyChooseUsSection';
+export { PopularToursSection } from './PopularToursSection';
+export { FAQSection } from './FAQSection';
+export { CTASection } from './CTASection';
+export { LandingPage } from './LandingPage';
+export { default } from './LandingPage';

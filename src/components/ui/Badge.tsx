@@ -17,10 +17,9 @@ export const Badge: FC<BadgeProps> = ({
     success: 'bg-green-100 text-green-700',
     warning: 'bg-amber-100 text-amber-700',
     danger: 'bg-red-100 text-red-700',
-    economy: 'bg-green-100 text-green-700',
-    suv: 'bg-red-100 text-red-700',
-    van: 'bg-blue-100 text-blue-700',
-    luxury: 'bg-amber-100 text-amber-700',
+    sedan: 'bg-blue-100 text-blue-700',
+    suv: 'bg-green-100 text-green-700',
+    van: 'bg-amber-100 text-amber-700',
   };
 
   const sizes = {

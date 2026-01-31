@@ -2,6 +2,7 @@ import { createBrowserRouter, type RouteObject } from 'react-router-dom';
 import { MainLayout, AdminLayout } from '@components/layout';
 import {
   LandingPage,
+  BrowseVehiclesPage,
   NotFoundPage,
   FeaturesPage,
   PricingPage,
@@ -25,8 +26,8 @@ export const routes: RouteObject[] = [
     element: <MainLayout><LandingPage /></MainLayout>,
   },
   {
-    path: '/features',
-    element: <MainLayout><FeaturesPage /></MainLayout>,
+    path: '/browsevehicles',
+    element: <MainLayout><BrowseVehiclesPage /></MainLayout>,
   },
   {
     path: '/pricing',
