@@ -27,6 +27,7 @@ import { Modal } from './Modal';
 import { Input } from './Input';
 import { Button } from './Button';
 import { supabase } from '@services/supabase';
+import { bookingService as adminBookingService } from '@services/adminBookingService';
 
 interface BookNowModalProps {
   isOpen: boolean;
@@ -483,18 +484,12 @@ export const BookNowModal: FC<BookNowModalProps> = ({
     setError(null);
 
     try {
-      // Get current user (optional - guest bookings allowed)
-      const { data: { user } } = await supabase.auth.getUser();
-
       // Validate required fields
       if (!formData.contact_number) {
         setError('Phone number is required. Please go back and fill in your details.');
         setIsLoading(false);
         return;
       }
-
-      // Generate booking number
-      const bookingNumber = `BK-${Date.now().toString(36).toUpperCase()}`;
       
       // Calculate costs
       const vehicleCost = formData.vehicle ? formData.vehicle.price_per_day * formData.rental_days : 0;
@@ -502,11 +497,11 @@ export const BookNowModal: FC<BookNowModalProps> = ({
       const driverCost = formData.drive_option === 'with-driver' ? DRIVER_COST.base * formData.rental_days : 0;
       const totalAmount = vehicleCost + locationCost + driverCost;
 
-      // Use the dedicated columns for booking data
-      // payment_status: 'pending' for all new bookings (valid values: pending, paid, failed, refunded)
+      // Prepare booking data using the new schema structure
       const bookingData = {
-        booking_number: bookingNumber,
-        user_id: user?.id || null, // Allow guest bookings
+        customer_name: formData.name,
+        customer_email: formData.email,
+        customer_phone: formData.contact_number,
         vehicle_id: formData.vehicle_id,
         pickup_date: formData.rent_start_date,
         return_date: formData.rent_end_date,
@@ -515,45 +510,83 @@ export const BookNowModal: FC<BookNowModalProps> = ({
         total_days: formData.rental_days,
         base_price: formData.vehicle?.price_per_day || 0,
         total_price: totalAmount,
-        status: 'pending',
-        payment_status: 'pending',
-        // Customer details (dedicated columns)
-        customer_name: formData.name,
-        customer_phone: formData.contact_number,
-        customer_email: formData.email || null,
-        // Booking details (dedicated columns)
-        drive_option: formData.drive_option,
-        start_time: formData.rent_start_time || null,
-        end_time: formData.rent_end_time || null,
-        payment_method: formData.payment_method,
-        // Additional data in extras JSONB
+        drive_option: formData.drive_option as 'self-drive' | 'with-driver',
+        start_time: formData.rent_start_time || undefined,
+        end_time: formData.rent_end_time || undefined,
+        payment_method: formData.payment_method as 'pay_now' | 'pay_later',
+        location_cost: locationCost,
+        driver_cost: driverCost,
+        pickup_delivery_location: formData.pickup_delivery_location ? LOCATION_COSTS[formData.pickup_delivery_location]?.label : undefined,
         extras: {
           vehicle_make: formData.vehicle?.make,
           vehicle_model: formData.vehicle?.model,
           vehicle_year: formData.vehicle?.year,
-          is_guest_booking: !user,
-          location_cost: locationCost,
-          driver_cost: driverCost,
+          is_guest_booking: true,
           vehicle_cost: vehicleCost,
+          booking_notes: `Booking via web (Guest) | ${formData.name} | ${formData.contact_number} | Location: ${formData.pickup_delivery_location ? LOCATION_COSTS[formData.pickup_delivery_location]?.label : 'N/A'}${formData.drive_option === 'with-driver' ? ' | With Driver' : ' | Self-Drive'}`,
         },
-        notes: `Booking via web${!user ? ' (Guest)' : ''} | ${formData.name} | ${formData.contact_number} | Location: ${formData.pickup_delivery_location ? LOCATION_COSTS[formData.pickup_delivery_location]?.label : 'N/A'}${formData.drive_option === 'with-driver' ? ' | With Driver' : ' | Self-Drive'}`,
       };
 
-      const { error: insertError } = await supabase
-        .from('bookings')
-        .insert(bookingData);
+      // Create booking using the admin booking service (creates customer + booking)
+      const { data: insertedBooking, error: insertError } = await adminBookingService.create(bookingData);
 
-      if (insertError) {
+      if (insertError || !insertedBooking) {
         console.error('Booking error:', insertError);
-        throw new Error(insertError.message);
+        throw new Error(insertError || 'Failed to create booking');
       }
 
       // Upload receipt if exists
-      if (formData.payment_receipt) {
-        // TODO: Upload to Supabase Storage and update payment_receipt_url
-        console.log('Receipt to upload:', formData.payment_receipt.name);
-      }
+      if (formData.payment_receipt && insertedBooking) {
+        try {
+          const fileExt = formData.payment_receipt.name.split('.').pop();
+          const fileName = `${insertedBooking.id}-${Date.now()}.${fileExt}`;
+          const filePath = `payment-receipts/${fileName}`;
 
+          console.log('Uploading receipt:', fileName);
+
+          // Upload to Supabase Storage
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('bookings')
+            .upload(filePath, formData.payment_receipt, {
+              cacheControl: '3600',
+              upsert: false
+            });
+
+          if (uploadError) {
+            console.error('Error uploading receipt:', uploadError);
+            console.error('Upload error details:', uploadError.message);
+            // Don't fail the booking, just log the error
+          } else {
+            console.log('Receipt uploaded successfully:', uploadData);
+            
+            // Get public URL
+            const { data: { publicUrl } } = supabase.storage
+              .from('bookings')
+              .getPublicUrl(filePath);
+
+            console.log('Public URL:', publicUrl);
+
+            // Update booking with receipt URL
+            const { data: updateData, error: updateError } = await supabase
+              .from('bookings')
+              .update({ payment_receipt_url: publicUrl })
+              .eq('id', insertedBooking.id)
+              .select();
+
+            if (updateError) {
+              console.error('Error updating booking with receipt URL:', updateError);
+              console.error('Update error message:', updateError.message);
+              console.error('Update error details:', JSON.stringify(updateError, null, 2));
+            } else {
+              console.log('Booking updated with receipt URL successfully');
+              console.log('Updated booking data:', updateData);
+            }
+          }
+        } catch (uploadErr) {
+          console.error('Error processing receipt upload:', uploadErr);
+          // Don't fail the booking
+        }
+      }
 
       setBookingComplete(true);
       onSuccess?.();

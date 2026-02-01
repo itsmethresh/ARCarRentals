@@ -3,23 +3,8 @@ import { supabase } from './supabase';
 export interface User {
   id: string;
   email: string;
-  fullName: string;
-  phoneNumber: string;
-  role: 'customer' | 'staff' | 'admin';
+  role: 'staff' | 'admin';
   isActive: boolean;
-  profile?: {
-    phone: string;
-    address?: string;
-    city?: string;
-    avatarUrl?: string;
-  };
-}
-
-export interface RegisterData {
-  fullName: string;
-  email: string;
-  phoneNumber: string;
-  password: string;
 }
 
 /**
@@ -27,89 +12,50 @@ export interface RegisterData {
  */
 export const authService = {
   /**
-   * Register a new user with phone number
+   * Login user with email and password
    */
-  async register(data: RegisterData): Promise<{ user: User | null; error: string | null }> {
+  async login(email: string, password: string): Promise<{ user: User | null; error: string | null }> {
     try {
-      // Check if phone number already exists in users table
-      const { data: existingUser } = await supabase
-        .from('users')
-        .select('phone_number')
-        .eq('phone_number', data.phoneNumber)
-        .single();
-
-      if (existingUser) {
-        return { user: null, error: 'Phone number already registered' };
-      }
-
-      // Register user with Supabase Auth
-      const { data: authData, error: signUpError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          data: {
-            full_name: data.fullName,
-            phone_number: data.phoneNumber,
-            role: 'customer',
-          },
-        },
+      // Sign in with email and password
+      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
       });
 
-      if (signUpError) {
-        return { user: null, error: signUpError.message };
+      if (signInError) {
+        console.error('Sign in error:', signInError);
+        return { user: null, error: 'Invalid email or password' };
       }
 
       if (!authData.user) {
-        return { user: null, error: 'Failed to create account' };
+        return { user: null, error: 'Login failed' };
       }
 
-      // Fetch the complete user data
+      console.log('Auth successful for user:', authData.user.id);
+
+      // Get user data from users table
       const { data: userData, error: userError } = await supabase
         .from('users')
-        .select('*, profiles(*)')
+        .select('id, email, role, is_active')
         .eq('id', authData.user.id)
         .single();
 
-      if (userError || !userData) {
-        return { user: null, error: 'Account created but failed to fetch user data' };
+      console.log('User query result:', { userData, userError });
+
+      if (userError) {
+        console.error('User query error:', userError);
+        // More detailed error message
+        if (userError.code === 'PGRST116') {
+          return { user: null, error: 'User record not found. Please contact support.' };
+        }
+        if (userError.message?.includes('RLS') || userError.message?.includes('policy')) {
+          return { user: null, error: 'Permission error. Please contact support.' };
+        }
+        return { user: null, error: `Database error: ${userError.message}` };
       }
 
-      const user: User = {
-        id: userData.id,
-        email: userData.email,
-        fullName: userData.profiles?.full_name || data.fullName,
-        phoneNumber: userData.profiles?.phone_number || data.phoneNumber,
-        role: userData.role as 'customer' | 'staff' | 'admin',
-        isActive: userData.is_active,
-        profile: {
-          phone: userData.profiles?.phone || data.phoneNumber,
-          address: userData.profiles?.address,
-          city: userData.profiles?.city,
-          avatarUrl: userData.profiles?.avatar_url,
-        },
-      };
-
-      return { user, error: null };
-    } catch (error) {
-      console.error('Registration error:', error);
-      return { user: null, error: 'An unexpected error occurred during registration' };
-    }
-  },
-
-  /**
-   * Login user with phone number and password
-   */
-  async loginWithPhone(phoneNumber: string, password: string): Promise<{ user: User | null; error: string | null }> {
-    try {
-      // Find user by phone number directly in users table
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('id, email, role, full_name, phone_number, is_active')
-        .eq('phone_number', phoneNumber)
-        .single();
-
-      if (userError || !userData) {
-        return { user: null, error: 'Invalid phone number or password' };
+      if (!userData) {
+        return { user: null, error: 'User not found in database' };
       }
 
       // Check if account is active
@@ -117,42 +63,14 @@ export const authService = {
         return { user: null, error: 'Account is inactive. Please contact support.' };
       }
 
-      // Sign in with email and password
-      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: userData.email,
-        password: password,
-      });
-
-      if (signInError) {
-        return { user: null, error: 'Invalid phone number or password' };
-      }
-
-      if (!authData.user) {
-        return { user: null, error: 'Login failed' };
-      }
-
-      // Fetch profile data if needed
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('phone, address, city, avatar_url')
-        .eq('id', authData.user.id)
-        .single();
-
       const user: User = {
         id: userData.id,
         email: userData.email,
-        fullName: userData.full_name || '',
-        phoneNumber: userData.phone_number || '',
-        role: userData.role as 'customer' | 'staff' | 'admin',
+        role: userData.role as 'staff' | 'admin',
         isActive: userData.is_active,
-        profile: {
-          phone: profileData?.phone || userData.phone_number || '',
-          address: profileData?.address,
-          city: profileData?.city,
-          avatarUrl: profileData?.avatar_url,
-        },
       };
 
+      console.log('Login successful for user:', user);
       return { user, error: null };
     } catch (error) {
       console.error('Login error:', error);
@@ -169,35 +87,20 @@ export const authService = {
       
       if (!authUser) return null;
 
-      // Get user data from users table (includes phone_number and full_name)
+      // Get user data from users table
       const { data: userData, error } = await supabase
         .from('users')
-        .select('id, email, role, full_name, phone_number, is_active')
+        .select('id, email, role, is_active')
         .eq('id', authUser.id)
         .single();
 
       if (error || !userData || !userData.is_active) return null;
 
-      // Get additional profile data if needed
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('phone, address, city, avatar_url')
-        .eq('id', authUser.id)
-        .single();
-
       return {
         id: userData.id,
         email: userData.email,
-        fullName: userData.full_name || '',
-        phoneNumber: userData.phone_number || '',
-        role: userData.role as 'customer' | 'staff' | 'admin',
+        role: userData.role as 'staff' | 'admin',
         isActive: userData.is_active,
-        profile: {
-          phone: profileData?.phone || userData.phone_number || '',
-          address: profileData?.address,
-          city: profileData?.city,
-          avatarUrl: profileData?.avatar_url,
-        },
       };
     } catch (error) {
       console.error('Get current user error:', error);

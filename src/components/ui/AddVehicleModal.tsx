@@ -138,7 +138,10 @@ export const AddVehicleModal: FC<AddVehicleModalProps> = ({
   };
 
   const uploadImage = async (): Promise<string | null> => {
-    if (!imageFile) return formData.image_url || null;
+    // If no file selected, return the URL from the input field
+    if (!imageFile) {
+      return formData.image_url?.trim() || null;
+    }
 
     setUploadingImage(true);
     try {
@@ -150,7 +153,11 @@ export const AddVehicleModal: FC<AddVehicleModalProps> = ({
         .from('vehicle-images')
         .upload(filePath, imageFile);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Storage upload error:', uploadError);
+        // If bucket doesn't exist or upload fails, use URL from input as fallback
+        return formData.image_url?.trim() || null;
+      }
 
       const { data: { publicUrl } } = supabase.storage
         .from('vehicle-images')
@@ -159,7 +166,8 @@ export const AddVehicleModal: FC<AddVehicleModalProps> = ({
       return publicUrl;
     } catch (err) {
       console.error('Error uploading image:', err);
-      return formData.image_url || null;
+      // Fallback to URL input if upload fails
+      return formData.image_url?.trim() || null;
     } finally {
       setUploadingImage(false);
     }
@@ -231,7 +239,6 @@ export const AddVehicleModal: FC<AddVehicleModalProps> = ({
         seats: parseInt(formData.seats) || 5,
         features: featuresArray,
         image_url: imageUrl,
-        thumbnail: imageUrl,
         price_per_day: parseFloat(formData.price_per_day),
         status: formData.status,
       });
@@ -472,12 +479,11 @@ export const AddVehicleModal: FC<AddVehicleModalProps> = ({
               onChange={(e) => {
                 handleChange(e);
                 if (e.target.value) {
-                  setImagePreview('');
+                  setImagePreview(e.target.value);
                   setImageFile(null);
                 }
               }}
               placeholder="https://example.com/car-image.jpg"
-              disabled={!!imageFile}
             />
 
             {/* Price */}

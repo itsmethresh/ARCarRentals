@@ -5,7 +5,6 @@ export interface Vehicle {
   brand: string;
   model: string;
   category_id?: string | null;
-  type?: string;
   transmission: string;
   fuel_type: string;
   seats: number;
@@ -13,7 +12,6 @@ export interface Vehicle {
   price_per_day: number;
   status: 'available' | 'rented' | 'maintenance';
   image_url?: string | null;
-  thumbnail?: string | null;
   features?: string[] | any;
   description?: string | null;
   is_featured?: boolean;
@@ -120,14 +118,17 @@ export const vehicleService = {
     try {
       let queryBuilder = supabase
         .from('vehicles')
-        .select('*');
+        .select(`
+          *,
+          vehicle_categories:category_id (id, name)
+        `);
 
       if (status && status !== 'all') {
         queryBuilder = queryBuilder.eq('status', status);
       }
 
       const { data, error } = await queryBuilder
-        .or(`brand.ilike.%${query}%,model.ilike.%${query}%,type.ilike.%${query}%`)
+        .or(`brand.ilike.%${query}%,model.ilike.%${query}%`)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -139,6 +140,112 @@ export const vehicleService = {
     } catch (error: any) {
       console.error('Error searching vehicles:', error);
       return { data: null, error: error.message || 'Failed to search vehicles' };
+    }
+  },
+
+  /**
+   * Create a new vehicle
+   */
+  async create(vehicleData: {
+    brand: string;
+    model: string;
+    category_id?: string | null;
+    color?: string | null;
+    transmission: 'automatic' | 'manual';
+    fuel_type: 'gasoline' | 'diesel' | 'electric' | 'hybrid';
+    seats: number;
+    features?: string[];
+    price_per_day: number;
+    status: 'available' | 'rented' | 'maintenance' | 'retired';
+    is_featured?: boolean;
+    image_url?: string | null;
+  }): Promise<{ data: Vehicle | null; error: string | null }> {
+    try {
+      const { data, error } = await supabase
+        .from('vehicles')
+        .insert({
+          ...vehicleData,
+          features: vehicleData.features || [],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating vehicle:', error);
+        return { data: null, error: error.message };
+      }
+
+      return { data, error: null };
+    } catch (error: any) {
+      console.error('Error creating vehicle:', error);
+      return { data: null, error: error.message || 'Failed to create vehicle' };
+    }
+  },
+
+  /**
+   * Update an existing vehicle
+   */
+  async update(
+    id: string,
+    vehicleData: Partial<{
+      brand: string;
+      model: string;
+      category_id: string | null;
+      color: string | null;
+      transmission: 'automatic' | 'manual';
+      fuel_type: 'gasoline' | 'diesel' | 'electric' | 'hybrid';
+      seats: number;
+      features: string[];
+      price_per_day: number;
+      status: 'available' | 'rented' | 'maintenance' | 'retired';
+      is_featured: boolean;
+      image_url: string | null;
+    }>
+  ): Promise<{ data: Vehicle | null; error: string | null }> {
+    try {
+      const { data, error } = await supabase
+        .from('vehicles')
+        .update({
+          ...vehicleData,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating vehicle:', error);
+        return { data: null, error: error.message };
+      }
+
+      return { data, error: null };
+    } catch (error: any) {
+      console.error('Error updating vehicle:', error);
+      return { data: null, error: error.message || 'Failed to update vehicle' };
+    }
+  },
+
+  /**
+   * Delete a vehicle
+   */
+  async delete(id: string): Promise<{ success: boolean; error: string | null }> {
+    try {
+      const { error } = await supabase
+        .from('vehicles')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error deleting vehicle:', error);
+        return { success: false, error: error.message };
+      }
+
+      return { success: true, error: null };
+    } catch (error: any) {
+      console.error('Error deleting vehicle:', error);
+      return { success: false, error: error.message || 'Failed to delete vehicle' };
     }
   },
 };

@@ -11,6 +11,7 @@ import {
   User,
   MapPin,
   Download,
+  RefreshCw,
 } from 'lucide-react';
 import { Card, Button, Input, AddBookingModal, EditBookingModal, ConfirmDialog, BookingDetailsModal, StatusUpdateModal } from '@components/ui';
 import { bookingService as adminBookingService, type Booking as BookingType, type BookingStats } from '@services/adminBookingService';
@@ -118,6 +119,22 @@ export const AdminBookingsPage: FC = () => {
 
   useEffect(() => {
     fetchBookings();
+
+    // Set up real-time subscription for bookings
+    const subscription = supabase
+      .channel('bookings-changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'bookings' },
+        () => {
+          // Refresh bookings when any change occurs
+          fetchBookings();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -152,6 +169,15 @@ export const AdminBookingsPage: FC = () => {
           <p className="text-neutral-500">View and manage all rental bookings</p>
         </div>
         <div className="flex gap-3">
+          <Button 
+            variant="outline" 
+            className="gap-2"
+            onClick={fetchBookings}
+            disabled={isLoading}
+          >
+            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
           <Button variant="outline" className="gap-2">
             <Download className="h-4 w-4" />
             Export
@@ -307,7 +333,7 @@ export const AdminBookingsPage: FC = () => {
                         </div>
                         <div>
                           <p className="font-medium text-neutral-900">
-                            {booking.customer_name || booking.users?.full_name || 'Guest'}
+                            {booking.customers?.full_name || 'Guest'}
                           </p>
                         </div>
                       </div>

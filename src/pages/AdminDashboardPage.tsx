@@ -148,7 +148,7 @@ export const AdminDashboardPage: FC = () => {
         if (recentBookingsRes.data) {
           const transformed: RecentBooking[] = recentBookingsRes.data.map((booking: Booking) => ({
             id: booking.id,
-            customer: booking.users?.full_name || 'Unknown',
+            customer: booking.customers?.full_name || 'Unknown',
             car: booking.vehicles ? `${booking.vehicles.brand} ${booking.vehicles.model}` : 'Unknown',
             status: booking.status as RecentBooking['status'],
             date: new Date(booking.pickup_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
@@ -183,7 +183,7 @@ export const AdminDashboardPage: FC = () => {
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold mb-2">
-              Welcome back, {user.fullName || 'Admin'}! 👋
+              Welcome back, Admin! 👋
             </h1>
             <p className="text-white/80">
               Here's what's happening with your business today.

@@ -33,8 +33,6 @@ interface BookingInput {
   total_amount?: number;
   deposit_paid?: number;
   status?: 'pending' | 'confirmed' | 'active' | 'completed' | 'cancelled';
-  payment_status?: 'pending' | 'partial' | 'paid' | 'refunded';
-  notes?: string | null;
   // Guest booking fields
   customer_name?: string | null;
   customer_phone?: string | null;
@@ -72,11 +70,9 @@ interface BookingFormData {
   pickup_location: string;
   return_location: string;
   status: 'pending' | 'confirmed' | 'active' | 'completed' | 'cancelled';
-  payment_status: 'pending' | 'partial' | 'paid' | 'refunded';
   deposit_paid: number;
   discount_amount: number;
   extras_price: number;
-  notes: string;
 }
 
 const STEPS = [
@@ -104,11 +100,9 @@ export const EditBookingModal: FC<EditBookingModalProps> = ({
     pickup_location: 'Cebu City',
     return_location: 'Cebu City',
     status: 'confirmed',
-    payment_status: 'pending',
     deposit_paid: 0,
     discount_amount: 0,
     extras_price: 0,
-    notes: '',
   });
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -129,11 +123,9 @@ export const EditBookingModal: FC<EditBookingModalProps> = ({
         pickup_location: booking.pickup_location || 'Cebu City',
         return_location: booking.return_location || 'Cebu City',
         status: booking.status || 'confirmed',
-        payment_status: booking.payment_status || 'pending',
         deposit_paid: booking.deposit_paid || 0,
         discount_amount: booking.discount_amount || 0,
         extras_price: booking.extras_price || 0,
-        notes: booking.notes || '',
       });
     }
   }, [booking, isOpen]);
@@ -270,8 +262,6 @@ export const EditBookingModal: FC<EditBookingModalProps> = ({
         total_price: pricing.total,
         deposit_paid: formData.deposit_paid,
         status: formData.status,
-        payment_status: formData.payment_status,
-        notes: formData.notes || null,
         updated_at: new Date().toISOString(),
       };
 
@@ -460,22 +450,6 @@ export const EditBookingModal: FC<EditBookingModalProps> = ({
                   <option value="cancelled">Cancelled</option>
                 </select>
               </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-neutral-700">
-                  Payment Status
-                </label>
-                <select
-                  name="payment_status"
-                  value={formData.payment_status}
-                  onChange={handleChange}
-                  className="w-full rounded-lg border border-neutral-300 bg-white px-4 py-3 text-neutral-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-                >
-                  <option value="pending">Pending</option>
-                  <option value="partial">Partial</option>
-                  <option value="paid">Paid</option>
-                  <option value="refunded">Refunded</option>
-                </select>
-              </div>
             </div>
             <div className="grid grid-cols-3 gap-4">
               <Input
@@ -498,19 +472,6 @@ export const EditBookingModal: FC<EditBookingModalProps> = ({
                 type="number"
                 value={formData.extras_price}
                 onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-medium text-neutral-700">
-                Notes
-              </label>
-              <textarea
-                name="notes"
-                value={formData.notes}
-                onChange={handleChange}
-                rows={3}
-                className="w-full rounded-lg border border-neutral-300 bg-white px-4 py-3 text-neutral-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 resize-none"
-                placeholder="Any additional notes..."
               />
             </div>
             {/* Pricing Summary */}

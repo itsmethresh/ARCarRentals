@@ -4,7 +4,7 @@ import { authService, type User } from '@services/authService';
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (phone: string, password: string) => Promise<{ success: boolean; error: string | null }>;
+  login: (email: string, password: string) => Promise<{ success: boolean; error: string | null }>;
   logout: () => void;
   isAdmin: boolean;
 }
@@ -25,8 +25,8 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     loadUser();
   }, []);
 
-  const login = async (phone: string, password: string) => {
-    const { user: loggedInUser, error } = await authService.loginWithPhone(phone, password);
+  const login = async (email: string, password: string) => {
+    const { user: loggedInUser, error } = await authService.login(email, password);
     
     if (loggedInUser) {
       setUser(loggedInUser);

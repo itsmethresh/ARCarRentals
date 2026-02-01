@@ -1,59 +1,38 @@
 import { type FC, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Phone, Lock, Eye, EyeOff, Car, ArrowRight, Shield } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Car, ArrowRight, Shield } from 'lucide-react';
 import { Button, Input, Container } from '@components/ui';
 import { authService } from '@services/authService';
-
-/**
- * Normalize Philippine phone number to international format
- */
-const normalizePhoneNumber = (phone: string): string => {
-  const digits = phone.replace(/\D/g, '');
-  
-  if (digits.startsWith('0')) {
-    return '+63' + digits.slice(1);
-  }
-  
-  if (digits.startsWith('63')) {
-    return '+' + digits;
-  }
-  
-  if (phone.startsWith('+')) {
-    return phone;
-  }
-  
-  return '+63' + digits;
-};
 
 /**
  * Admin Login page component - matches landing page design
  */
 export const LoginPage: FC = () => {
   const navigate = useNavigate();
-  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<{ phone?: string; password?: string; general?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});
 
   // Load remembered credentials on mount
   useEffect(() => {
-    const savedPhone = localStorage.getItem('admin_remembered_phone');
+    const savedEmail = localStorage.getItem('admin_remembered_email');
     const savedRemember = localStorage.getItem('admin_remember_me') === 'true';
-    if (savedPhone && savedRemember) {
-      setPhone(savedPhone);
+    if (savedEmail && savedRemember) {
+      setEmail(savedEmail);
       setRememberMe(true);
     }
   }, []);
 
   const validateForm = () => {
-    const newErrors: { phone?: string; password?: string } = {};
+    const newErrors: { email?: string; password?: string } = {};
 
-    if (!phone) {
-      newErrors.phone = 'Phone number is required';
-    } else if (!/^[0-9+\-\s()]{10,15}$/.test(phone)) {
-      newErrors.phone = 'Please enter a valid phone number';
+    if (!email) {
+      newErrors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = 'Please enter a valid email address';
     }
 
     if (!password) {
@@ -75,16 +54,14 @@ export const LoginPage: FC = () => {
     setErrors({});
     
     try {
-      // Normalize phone number to international format
-      const normalizedPhone = normalizePhoneNumber(phone);
-      const { user, error } = await authService.loginWithPhone(normalizedPhone, password);
+      const { user, error } = await authService.login(email, password);
 
       if (error || !user) {
-        setErrors({ general: error || 'Invalid phone number or password' });
+        setErrors({ general: error || 'Invalid email or password' });
         return;
       }
 
-      // Check if user is admin
+      // Check if user is admin or staff
       if (user.role !== 'admin' && user.role !== 'staff') {
         setErrors({ general: 'Access denied. Admin credentials required.' });
         await authService.logout();
@@ -93,10 +70,10 @@ export const LoginPage: FC = () => {
 
       // Handle Remember Me
       if (rememberMe) {
-        localStorage.setItem('admin_remembered_phone', phone);
+        localStorage.setItem('admin_remembered_email', email);
         localStorage.setItem('admin_remember_me', 'true');
       } else {
-        localStorage.removeItem('admin_remembered_phone');
+        localStorage.removeItem('admin_remembered_email');
         localStorage.removeItem('admin_remember_me');
       }
 
@@ -220,15 +197,15 @@ export const LoginPage: FC = () => {
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <label className="block text-sm font-semibold text-neutral-700 mb-2">
-                    Phone Number
+                    Email Address
                   </label>
                   <Input
-                    type="tel"
-                    placeholder="09773259391"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    leftIcon={<Phone className="h-5 w-5 text-neutral-400" />}
-                    error={errors.phone}
+                    type="email"
+                    placeholder="admin@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    leftIcon={<Mail className="h-5 w-5 text-neutral-400" />}
+                    error={errors.email}
                     className="h-12"
                   />
                 </div>

@@ -12,7 +12,6 @@ import {
 } from 'lucide-react';
 import { Card, Button, Input, AddVehicleModal, EditVehicleModal, ConfirmDialog } from '@components/ui';
 import { vehicleService, type Vehicle as VehicleType, type VehicleStats } from '@services/vehicleService';
-import { supabase } from '@services/supabase';
 
 const StatusBadge: FC<{ status: VehicleType['status'] }> = ({ status }) => {
   const styles = {
@@ -112,18 +111,18 @@ export const AdminFleetPage: FC = () => {
     
     setIsDeleting(true);
     try {
-      const { error } = await supabase
-        .from('vehicles')
-        .delete()
-        .eq('id', selectedVehicle.id);
+      const { success, error } = await vehicleService.delete(selectedVehicle.id);
 
-      if (error) throw error;
+      if (!success || error) {
+        throw new Error(error || 'Failed to delete vehicle');
+      }
       
       fetchVehicles();
       setIsDeleteDialogOpen(false);
       setSelectedVehicle(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting vehicle:', error);
+      alert(error.message || 'Failed to delete vehicle');
     } finally {
       setIsDeleting(false);
     }
@@ -280,7 +279,7 @@ export const AdminFleetPage: FC = () => {
                 <div>
                   <h3 className="font-bold text-neutral-900">{vehicle.brand} {vehicle.model}</h3>
                   <p className="text-sm text-neutral-500">
-                    {vehicle.vehicle_categories?.name || vehicle.type || 'Uncategorized'}
+                    {vehicle.vehicle_categories?.name || 'Uncategorized'}
                     {vehicle.color ? ` • ${vehicle.color}` : ''}
                   </p>
                 </div>

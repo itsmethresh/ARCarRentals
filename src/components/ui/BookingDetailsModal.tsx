@@ -107,6 +107,10 @@ export const BookingDetailsModal: FC<BookingDetailsModalProps> = ({
 
   if (!booking) return null;
 
+  // Debug: Log booking data to see if payment_receipt_url exists
+  console.log('Booking data in modal:', booking);
+  console.log('Payment receipt URL:', booking.payment_receipt_url);
+
   const customerName = booking.customer_name || booking.users?.full_name || 'Guest';
   const customerPhone = booking.customer_phone || booking.users?.phone_number || 'N/A';
   const customerEmail = booking.customer_email || booking.users?.email || 'N/A';

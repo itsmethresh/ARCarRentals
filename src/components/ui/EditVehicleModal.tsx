@@ -23,7 +23,6 @@ interface VehicleInput {
   fuel_type?: string;
   seats?: number;
   features?: string[] | any;
-  thumbnail?: string | null;
   image_url?: string | null;
   price_per_day?: number;
   status?: 'available' | 'rented' | 'maintenance';
@@ -134,11 +133,11 @@ export const EditVehicleModal: FC<EditVehicleModalProps> = ({
         fuel_type: (vehicle.fuel_type as 'gasoline' | 'diesel' | 'hybrid' | 'electric') || 'gasoline',
         seats: vehicle.seats?.toString() || '5',
         features: featuresStr,
-        image_url: vehicle.image_url || vehicle.thumbnail || '',
+        image_url: vehicle.image_url || '',
         price_per_day: vehicle.price_per_day?.toString() || '',
         status: vehicle.status || 'available',
       });
-      setImagePreview(vehicle.image_url || vehicle.thumbnail || '');
+      setImagePreview(vehicle.image_url || '');
       setImageFile(null);
     }
   }, [vehicle, isOpen]);
@@ -242,7 +241,6 @@ export const EditVehicleModal: FC<EditVehicleModalProps> = ({
           seats: parseInt(formData.seats) || 5,
           features: featuresArray,
           image_url: imageUrl,
-          thumbnail: imageUrl,
           price_per_day: parseFloat(formData.price_per_day),
           status: formData.status,
           updated_at: new Date().toISOString(),

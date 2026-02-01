@@ -45,11 +45,9 @@ interface BookingFormData {
   pickup_location: string;
   return_location: string;
   status: 'pending' | 'confirmed' | 'active';
-  payment_status: 'pending' | 'partial' | 'paid';
   deposit_paid: number;
   discount_amount: number;
   extras_price: number;
-  notes: string;
 }
 
 const initialFormData: BookingFormData = {
@@ -60,11 +58,9 @@ const initialFormData: BookingFormData = {
   pickup_location: 'Cebu City',
   return_location: 'Cebu City',
   status: 'confirmed',
-  payment_status: 'pending',
   deposit_paid: 0,
   discount_amount: 0,
   extras_price: 0,
-  notes: '',
 };
 
 const STEPS = [
@@ -237,8 +233,6 @@ export const AddBookingModal: FC<AddBookingModalProps> = ({
         total_price: pricing.total,
         deposit_paid: formData.deposit_paid,
         status: formData.status,
-        payment_status: formData.payment_status,
-        notes: formData.notes || null,
       };
 
       const { error: insertError } = await supabase
@@ -493,21 +487,6 @@ export const AddBookingModal: FC<AddBookingModalProps> = ({
                   <option value="active">Active</option>
                 </select>
               </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-neutral-700">
-                  Payment Status
-                </label>
-                <select
-                  name="payment_status"
-                  value={formData.payment_status}
-                  onChange={handleChange}
-                  className="w-full rounded-lg border border-neutral-300 bg-white px-4 py-3 text-neutral-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-                >
-                  <option value="pending">Pending</option>
-                  <option value="partial">Partial</option>
-                  <option value="paid">Paid</option>
-                </select>
-              </div>
             </div>
             <div className="grid grid-cols-3 gap-4">
               <Input
@@ -533,19 +512,6 @@ export const AddBookingModal: FC<AddBookingModalProps> = ({
                 min={0}
                 value={formData.discount_amount}
                 onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-medium text-neutral-700">
-                Notes (Optional)
-              </label>
-              <textarea
-                name="notes"
-                value={formData.notes}
-                onChange={handleChange}
-                rows={2}
-                placeholder="Any special requests..."
-                className="w-full rounded-lg border border-neutral-300 bg-white px-4 py-3 text-neutral-900 placeholder:text-neutral-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 resize-none"
               />
             </div>
           </div>
