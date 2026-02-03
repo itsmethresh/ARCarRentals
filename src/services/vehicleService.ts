@@ -149,7 +149,10 @@ export const vehicleService = {
     try {
       const { data, error } = await supabase
         .from('vehicles')
-        .select('*')
+        .select(`
+          *,
+          vehicle_categories:category_id (id, name)
+        `)
         .eq('status', 'available')
         .order('created_at', { ascending: false });
       
@@ -162,7 +165,7 @@ export const vehicleService = {
         brand: vehicle.brand,
         model: vehicle.model,
         year: new Date().getFullYear(),
-        category: mapVehicleCategory(vehicle.type || vehicle.category_id),
+        category: mapVehicleCategory(vehicle.vehicle_categories?.name),
         pricePerDay: Number(vehicle.price_per_day),
         currency: 'PHP',
         seats: vehicle.seats || 5,

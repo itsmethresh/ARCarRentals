@@ -22,22 +22,24 @@ interface FilterState {
 const FilterSidebar: FC<{
   filters: FilterState;
   onFilterChange: (filters: FilterState) => void;
-}> = ({ filters, onFilterChange }) => {
+  allCars: Car[];
+}> = ({ filters, onFilterChange, allCars }) => {
+  // Calculate counts dynamically from database
   const carTypes = [
-    { value: 'sedan', label: 'Sedan', count: 2 },
-    { value: 'suv', label: 'SUV', count: 5 },
-    { value: 'van', label: 'Van', count: 3 },
+    { value: 'sedan', label: 'Sedan', count: allCars.filter(c => c.category === 'sedan').length },
+    { value: 'suv', label: 'SUV', count: allCars.filter(c => c.category === 'suv').length },
+    { value: 'van', label: 'Van', count: allCars.filter(c => c.category === 'van').length },
   ];
 
   const transmissions = [
-    { value: 'automatic', label: 'Automatic' },
-    { value: 'manual', label: 'Manual' },
+    { value: 'automatic', label: 'Automatic', count: allCars.filter(c => c.transmission === 'automatic').length },
+    { value: 'manual', label: 'Manual', count: allCars.filter(c => c.transmission === 'manual').length },
   ];
 
   const seatOptions = [
-    { value: '2-5', label: '2 - 5 Seats' },
-    { value: '6-8', label: '6 - 8 Seats' },
-    { value: '9+', label: '9+ Seats' },
+    { value: '2-5', label: '2 - 5 Seats', count: allCars.filter(c => c.seats >= 2 && c.seats <= 5).length },
+    { value: '6-8', label: '6 - 8 Seats', count: allCars.filter(c => c.seats >= 6 && c.seats <= 8).length },
+    { value: '9+', label: '9+ Seats', count: allCars.filter(c => c.seats >= 9).length },
   ];
 
   const toggleCarType = (type: string) => {
@@ -206,6 +208,7 @@ const FilterSidebar: FC<{
                     )}
                   </div>
                   <span className="text-neutral-700 text-sm select-none">{trans.label}</span>
+                  <span className="text-neutral-400 text-xs">({trans.count})</span>
                 </div>
               );
             })}
@@ -250,6 +253,7 @@ const FilterSidebar: FC<{
                     )}
                   </div>
                   <span className="text-neutral-700 text-sm select-none">{seatOpt.label}</span>
+                  <span className="text-neutral-400 text-xs">({seatOpt.count})</span>
                 </div>
               );
             })}
@@ -319,7 +323,7 @@ const FilterSidebar: FC<{
  * Browse Vehicles Page
  */
 export const BrowseVehiclesPage: FC = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   
   // Vehicle state
@@ -355,6 +359,28 @@ export const BrowseVehiclesPage: FC = () => {
     
     loadVehicles();
   }, []);
+
+  // Handle filter changes and sync with URL
+  const handleFilterChange = (newFilters: FilterState) => {
+    setFilters(newFilters);
+    
+    // Update URL parameters
+    const params = new URLSearchParams();
+    
+    if (newFilters.carTypes.length === 1) {
+      params.set('carType', newFilters.carTypes[0]);
+    }
+    
+    if (newFilters.transmissions.length === 1) {
+      params.set('transmission', newFilters.transmissions[0]);
+    }
+    
+    if (newFilters.seats.length === 1) {
+      params.set('seats', newFilters.seats[0]);
+    }
+    
+    setSearchParams(params);
+  };
 
   // Handle booking a car - navigate to booking page
   const handleBookNow = async (car: Car) => {
@@ -423,15 +449,11 @@ export const BrowseVehiclesPage: FC = () => {
       return false;
     }
 
-    // Filter by seats (from URL parameter or sidebar filter)
-    const seatsParam = searchParams.get('seats');
-    const seatsFilter = seatsParam || (filters.seats.length > 0 ? filters.seats : null);
-    
-    if (seatsFilter) {
-      const seatRanges = Array.isArray(seatsFilter) ? seatsFilter : [seatsFilter];
+    // Filter by seats
+    if (filters.seats.length > 0) {
       let matchesSeats = false;
       
-      for (const range of seatRanges) {
+      for (const range of filters.seats) {
         if (range === '2-5' && car.seats >= 2 && car.seats <= 5) {
           matchesSeats = true;
           break;
@@ -489,7 +511,8 @@ export const BrowseVehiclesPage: FC = () => {
           <div className="hidden lg:block w-64 flex-shrink-0">
             <FilterSidebar
               filters={filters}
-              onFilterChange={setFilters}
+              onFilterChange={handleFilterChange}
+              allCars={allCars}
             />
           </div>
 
