@@ -2,9 +2,9 @@ import type { FC } from 'react';
 import { HeroSection } from './HeroSection';
 import { TestimonialsSection } from './TestimonialsSection';
 import { FeaturedFleetSection } from './FeaturedFleetSection';
-import { WhyChooseUsSection } from './WhyChooseUsSection';
-import { PopularToursSection } from './PopularToursSection';
-import { FAQSection } from './FAQSection';
+import { HowItWorksSection } from './HowItWorksSection';
+import { StatsSection } from './StatsSection';
+import { InfiniteScrollGallerySection } from './DomeGallerySection';
 import { CTASection } from './CTASection';
 
 /**
@@ -16,9 +16,9 @@ export const LandingPage: FC = () => {
       <HeroSection />
       <TestimonialsSection />
       <FeaturedFleetSection />
-      <WhyChooseUsSection />
-      <PopularToursSection />
-      <FAQSection />
+      <HowItWorksSection />
+      <StatsSection />
+      <InfiniteScrollGallerySection />
       <CTASection />
     </>
   );

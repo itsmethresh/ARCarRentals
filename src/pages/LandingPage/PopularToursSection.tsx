@@ -28,7 +28,7 @@ const popularTours: Tour[] = [
 export const PopularToursSection: FC = () => {
   return (
     <section 
-      className="bg-white flex flex-col justify-center py-10 sm:py-16"
+      className="bg-white flex flex-col justify-center py-16 sm:py-24"
       style={{ 
         minHeight: '400px',
         fontFamily: "'Plus Jakarta Sans', sans-serif" 

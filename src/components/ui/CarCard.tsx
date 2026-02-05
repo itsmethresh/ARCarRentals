@@ -62,8 +62,8 @@ export const CarCard: FC<CarCardProps> = ({
 
   return (
     <div 
-      className="bg-white rounded-[16px] border border-[#ededf2] shadow-sm hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full"
-      style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", minWidth: '280px' }}
+      className="bg-white rounded-[16px] border border-[#ededf2] shadow-sm hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full w-full"
+      style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
     >
       {/* Header: Name + Category Badge */}
       <div className="px-5 pt-4 pb-2">

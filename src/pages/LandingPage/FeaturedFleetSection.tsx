@@ -142,31 +142,28 @@ export const FeaturedFleetSection: FC = () => {
 
   return (
     <section 
-      className="bg-white py-10 sm:py-16"
+      className="bg-white py-16 sm:py-24"
       style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
     >
       <div className="mx-auto w-full max-w-[1600px]" style={{ paddingInline: 'clamp(1.5rem, 3vw, 3rem)' }}>
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 sm:mb-10 gap-4">
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 mb-2">
-              Featured Fleet
+            <h2 className="text-3xl sm:text-4xl font-bold text-neutral-900">
+              Discover Your Perfect Ride Today
             </h2>
-            <p className="text-neutral-500 text-sm sm:text-base">
-              Choose from our wide range of well-maintained vehicles.
-            </p>
           </div>
           <Link
             to="/browsevehicles"
-            className="text-[#E22B2B] font-medium hover:text-[#c92525] transition-colors inline-flex items-center gap-1"
+            className="text-neutral-900 font-medium hover:text-[#E22B2B] transition-colors inline-flex items-center gap-1"
           >
-            View All Cars
+            View All
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
         {/* Cars Grid - responsive */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {featuredCars.map((car) => (
             <CarCard 
               key={car.id} 

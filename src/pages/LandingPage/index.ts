@@ -2,6 +2,7 @@ export { HeroSection } from './HeroSection';
 export { TestimonialsSection } from './TestimonialsSection';
 export { FeaturedFleetSection } from './FeaturedFleetSection';
 export { WhyChooseUsSection } from './WhyChooseUsSection';
+export { HowItWorksSection } from './HowItWorksSection';
 export { PopularToursSection } from './PopularToursSection';
 export { FAQSection } from './FAQSection';
 export { CTASection } from './CTASection';

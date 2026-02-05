@@ -1,6 +1,6 @@
 import { type FC, useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { Menu, X, Facebook, Instagram, Twitter, Clock, MapPin } from 'lucide-react';
+import { Menu, X, Facebook, Instagram, Twitter, Clock, MapPin, Phone } from 'lucide-react';
 import { motion, useAnimationControls } from 'framer-motion';
 import { cn } from '@utils/helpers';
 import { config } from '@utils/config';
@@ -14,9 +14,9 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: 'Home', href: '/' },
-  { label: 'Browse Vehicles', href: '/browsevehicles' },
-  { label: 'How to Rent', href: '/how-to-rent' },
+  { label: 'Vehicles', href: '/browsevehicles' },
   { label: 'About Us', href: '/aboutus' },
+  { label: 'Contact Us', href: '/contact' },
 ];
 
 /**
@@ -218,16 +218,20 @@ export const Header: FC = () => {
               ))}
             </div>
 
-            {/* Desktop CTA */}
+            {/* Desktop CTA - Need Help Button */}
             <div className="hidden lg:flex items-center flex-shrink-0">
-              <Button 
-                variant="primary" 
-                size="md"
-                onClick={handleBookNowClick}
-                className="bg-[#E22B2B] hover:bg-[#c92525] border-none rounded-md px-6 font-medium whitespace-nowrap"
+              <a 
+                href="tel:+639566625224"
+                className="flex items-center gap-3 px-4 py-2 rounded-md hover:opacity-90 transition-opacity"
               >
-                {isBrowseVehiclesPage ? 'View Cars' : 'Book Now'}
-              </Button>
+                <div className="w-10 h-10 bg-[#E22B2B] rounded-full flex items-center justify-center">
+                  <Phone className="h-5 w-5 text-white fill-white" strokeWidth={0} fill="currentColor" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-white text-xs font-medium">Need help?</span>
+                  <span className="text-white text-sm font-bold">+63 956 662 5224</span>
+                </div>
+              </a>
             </div>
 
             {/* Mobile Menu Button */}

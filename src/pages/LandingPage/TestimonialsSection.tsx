@@ -95,13 +95,13 @@ export const TestimonialsSection: FC = () => {
 
   return (
     <section 
-      className="bg-[#F0F0F0]"
+      className="bg-white"
       style={{ 
         minHeight: '400px',
         fontFamily: "'Plus Jakarta Sans', sans-serif",
       }}
     >
-      <div className="h-full mx-auto w-full max-w-[1600px] py-8 sm:py-12 flex flex-col" style={{ paddingInline: 'clamp(1.5rem, 3vw, 3rem)' }}>
+      <div className="h-full mx-auto w-full max-w-[1600px] py-16 sm:py-20 flex flex-col" style={{ paddingInline: 'clamp(1.5rem, 3vw, 3rem)' }}>
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 gap-4">
           <div>
