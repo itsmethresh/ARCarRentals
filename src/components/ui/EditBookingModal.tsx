@@ -312,16 +312,6 @@ export const EditBookingModal: FC<EditBookingModalProps> = ({
               vehicleName,
               pickupDate,
               returnDate
-            }, 
-                month: 'long', 
-                day: 'numeric', 
-                year: 'numeric' 
-              }),
-              returnDate: new Date(formData.return_date).toLocaleDateString('en-US', { 
-                month: 'long', 
-                day: 'numeric', 
-                year: 'numeric' 
-              })
             },
             'confirmed' // Send confirmed email
           );
