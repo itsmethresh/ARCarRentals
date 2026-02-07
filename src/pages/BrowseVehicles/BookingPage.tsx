@@ -4,6 +4,7 @@ import { User, Check, ChevronRight, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui';
 import type { Car } from '@/types';
 import { updateRenterInfo, updateSearchCriteria, updateDriveOption, agreeToTerms } from '@/utils/sessionManager';
+import { CarRentalAgreementModal } from './CarRentalAgreementModal';
 
 interface BookingState {
   vehicle: Car;
@@ -46,6 +47,7 @@ export const BookingPage: FC = () => {
     returnDate: false,
     driveOption: false,
   });
+  const [showAgreementModal, setShowAgreementModal] = useState(false);
 
   // Redirect if no vehicle data
   useEffect(() => {
@@ -104,7 +106,7 @@ export const BookingPage: FC = () => {
     return `${displayHour}:${minutes} ${ampm}`;
   };
 
-  // Handle form submission
+  // Handle form submission - Show agreement first
   const handleProceedToPayment = async () => {
     // Validate required fields
     const errors = {
@@ -135,6 +137,15 @@ export const BookingPage: FC = () => {
       returnDate: false,
       driveOption: false,
     });
+
+    // Show rental agreement modal
+    setShowAgreementModal(true);
+  };
+
+  // Handle agreement accepted - Proceed to checkout
+  const handleAgreementAccepted = async () => {
+    // Close modal
+    setShowAgreementModal(false);
 
     // Save renter info and drive option to session
     await updateRenterInfo({
@@ -308,7 +319,7 @@ export const BookingPage: FC = () => {
                           setFormErrors(prev => ({ ...prev, phoneNumber: false }));
                         }
                       }}
-                      placeholder="+63 917 123 4567"
+                      placeholder="+63 956 662 5224"
                       className={`w-full px-4 py-3 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#E22B2B]/20 focus:border-[#E22B2B] ${
                         formErrors.phoneNumber ? 'border-[#E22B2B] ring-2 ring-[#E22B2B]/20' : 'border-neutral-200'
                       }`}
@@ -603,6 +614,14 @@ export const BookingPage: FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Rental Agreement Modal */}
+      <CarRentalAgreementModal
+        isOpen={showAgreementModal}
+        onClose={() => setShowAgreementModal(false)}
+        onAgree={handleAgreementAccepted}
+        isSelfDrive={driveOption === 'self-drive'}
+      />
     </div>
   );
 };
