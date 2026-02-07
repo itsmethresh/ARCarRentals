@@ -188,13 +188,17 @@ export const vehicleService = {
           ? vehicleImages[0] 
           : vehicle.image_url || 'https://images.unsplash.com/photo-1550355291-bbee04a92027?w=800&q=80';
         
+        // Normalize category to lowercase to match CarCategory type
+        const categoryName = vehicle.vehicle_categories?.name?.toLowerCase() || 'suv';
+        const validCategory = ['sedan', 'suv', 'van'].includes(categoryName) ? categoryName : 'suv';
+        
         return {
           id: vehicle.id,
           name: `${vehicle.brand} ${vehicle.model}`,
           brand: vehicle.brand,
           model: vehicle.model,
           year: new Date().getFullYear(),
-          category: vehicle.vehicle_categories?.name || 'SUV',
+          category: validCategory as 'sedan' | 'suv' | 'van',
           pricePerDay: Number(vehicle.price_per_day),
           currency: 'PHP',
           seats: vehicle.seats || 5,

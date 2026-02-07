@@ -1,6 +1,6 @@
 import { type FC, useState } from 'react';
 import { 
-  X, User, Car, Calendar, MapPin, CreditCard, FileText, Phone, Mail, 
+  User, Car, Calendar, MapPin, CreditCard, Phone, Mail, 
   CheckCircle, XCircle, Clock, AlertCircle, Receipt 
 } from 'lucide-react';
 import { Modal } from './Modal';
