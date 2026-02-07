@@ -335,7 +335,7 @@ export const bookingService = {
 
       // Update vehicle status if needed
       if (updateVehicleStatus && booking?.vehicle_id) {
-        const vehicleStatus = status === 'confirmed' || status === 'active' ? 'rented' : 'available';
+        const vehicleStatus = status === 'confirmed' ? 'rented' : 'available';
         await supabase
           .from('vehicles')
           .update({ status: vehicleStatus })

@@ -5,7 +5,6 @@ import {
   Trash2,
   User,
   RefreshCw,
-  Plus,
   ArrowRight,
   Download,
   SlidersHorizontal,
