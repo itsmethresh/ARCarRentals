@@ -392,6 +392,30 @@ export const AdminCustomersPage: FC = () => {
         variant="danger"
         isLoading={isDeleting}
       />
+
+      <style>{`
+        /* Mobile responsive styles */
+        @media (max-width: 768px) {
+          .overflow-x-auto {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+          }
+          
+          .overflow-x-auto table {
+            min-width: 800px;
+          }
+
+          .grid.grid-cols-2 {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .grid.grid-cols-2 {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </div>
   );
 };

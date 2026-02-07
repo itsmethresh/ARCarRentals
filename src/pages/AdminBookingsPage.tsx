@@ -8,6 +8,8 @@ import {
   Plus,
   ArrowRight,
   Download,
+  SlidersHorizontal,
+  Car,
 } from 'lucide-react';
 import { Button, Input, ConfirmDialog } from '@components/ui';
 import { supabase } from '@services/supabase';
@@ -87,11 +89,14 @@ interface BookingListCardProps {
 const BookingListCard: FC<BookingListCardProps> = ({ booking, onClick, onDelete }) => {
   const endDate = new Date(booking.start_date);
   endDate.setDate(endDate.getDate() + booking.rental_days);
+  const latestPayment = booking.payments?.[0];
+  const isActive = booking.booking_status === 'confirmed' && latestPayment?.payment_status === 'paid';
 
   return (
-    <div className="booking-list-card">
-      <div className="grid gap-6" style={{ gridTemplateColumns: '3fr 1.8fr 3.5fr 1.5fr auto' }}>
-        {/* Vehicle Column - Without Image */}
+    <div className="booking-list-card" onClick={onClick} style={{ cursor: 'pointer' }}>
+      {/* Desktop layout */}
+      <div className="booking-card-desktop">
+        {/* Vehicle Column */}
         <div className="flex items-center">
           <div>
             <div className="text-xs text-red-600 font-bold mb-1">
@@ -100,7 +105,6 @@ const BookingListCard: FC<BookingListCardProps> = ({ booking, onClick, onDelete 
             <div className="text-sm font-semibold text-neutral-900">
               {booking.vehicles ? `${booking.vehicles.brand} ${booking.vehicles.model}` : 'N/A'}
             </div>
-            {/* Horizontal divider with specs */}
             <div className="flex items-center gap-2 mt-1 text-xs text-neutral-500">
               <span>{booking.vehicles?.vehicle_categories?.name || 'SUV'}</span>
               <div className="h-3 w-px bg-neutral-300"></div>
@@ -124,44 +128,25 @@ const BookingListCard: FC<BookingListCardProps> = ({ booking, onClick, onDelete 
           </div>
         </div>
 
-        {/* Trip Info Column - Contains Pickup, Arrow, Return, Duration */}
+        {/* Trip Info Column */}
         <div className="flex items-start gap-4 pl-16">
-          {/* Pickup */}
           <div>
             <div className="text-xs text-neutral-500 mb-1">PICKUP</div>
             <div className="text-sm font-medium text-neutral-900">
-              {new Date(booking.start_date).toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric', 
-                year: 'numeric' 
-              })}
+              {new Date(booking.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </div>
-            <div className="text-xs text-neutral-500">
-              {booking.start_time || '10:00 AM'}
-            </div>
+            <div className="text-xs text-neutral-500">{booking.start_time || '10:00 AM'}</div>
           </div>
-
-          {/* Arrow */}
           <div className="flex items-center pt-4">
             <ArrowRight className="h-5 w-5 text-neutral-400" />
           </div>
-
-          {/* Return */}
           <div>
             <div className="text-xs text-neutral-500 mb-1">RETURN</div>
             <div className="text-sm font-medium text-neutral-900">
-              {endDate.toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric', 
-                year: 'numeric' 
-              })}
+              {endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </div>
-            <div className="text-xs text-neutral-500">
-              {booking.pickup_time || '10:00 AM'}
-            </div>
+            <div className="text-xs text-neutral-500">{booking.pickup_time || '10:00 AM'}</div>
           </div>
-
-          {/* Duration Badge */}
           <div className="flex items-center pt-4 pl-24">
             <div className="text-sm font-medium text-neutral-600">
               {booking.rental_days === 1 ? '1 Day' : `${booking.rental_days} Days`}
@@ -174,31 +159,93 @@ const BookingListCard: FC<BookingListCardProps> = ({ booking, onClick, onDelete 
           <div className="text-2xl font-bold text-neutral-900 mb-2">
             ₱{booking.total_amount.toLocaleString()}
           </div>
-          <div className={`status-badge status-${booking.booking_status}`}>
-            {booking.booking_status === 'confirmed' ? 'ACCEPTED' : 
-             booking.booking_status === 'refund_pending' ? 'REFUND PENDING' : 
-             booking.booking_status.toUpperCase()}
+          <div className={`status-badge ${isActive ? 'status-active' : `status-${booking.booking_status}`}`}>
+            {isActive ? 'ACTIVE' : booking.booking_status === 'confirmed' ? 'ACCEPTED' : booking.booking_status === 'refund_pending' ? 'REFUND PENDING' : booking.booking_status.toUpperCase()}
           </div>
+          {latestPayment && (
+            <div className={`mt-2 text-xs font-medium px-2 py-1 rounded-full inline-block ${
+              latestPayment.payment_status === 'completed' || latestPayment.payment_status === 'paid' ? 'bg-green-100 text-green-800' : latestPayment.payment_status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-neutral-100 text-neutral-800'
+            }`}>
+              Payment: {latestPayment.payment_status.charAt(0).toUpperCase() + latestPayment.payment_status.slice(1)}
+            </div>
+          )}
         </div>
 
         {/* Actions Column */}
         <div className="flex items-center justify-end gap-2">
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={onClick}
-            className="bg-red-600 hover:bg-red-700 text-white border-red-600 whitespace-nowrap"
-          >
+          <Button variant="primary" size="sm" onClick={(e: React.MouseEvent) => { e.stopPropagation(); onClick(); }} className="bg-red-600 hover:bg-red-700 text-white border-red-600 whitespace-nowrap">
             View Details
           </Button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
-            className="p-2 hover:bg-red-50 rounded-lg transition-colors text-red-600"
-            title="Delete booking"
-          >
+          <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="p-2 hover:bg-red-50 rounded-lg transition-colors text-red-600" title="Delete booking">
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile layout */}
+      <div className="booking-card-mobile">
+        {/* Top: Reference + Status */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="text-xs text-red-600 font-bold">{booking.booking_reference}</div>
+          <div className={`status-badge ${isActive ? 'status-active' : `status-${booking.booking_status}`}`}>
+            {isActive ? 'ACTIVE' : booking.booking_status === 'confirmed' ? 'ACCEPTED' : booking.booking_status === 'refund_pending' ? 'REFUND PENDING' : booking.booking_status.toUpperCase()}
+          </div>
+        </div>
+
+        {/* Vehicle */}
+        <div className="text-base font-semibold text-neutral-900 mb-1">
+          {booking.vehicles ? `${booking.vehicles.brand} ${booking.vehicles.model}` : 'N/A'}
+        </div>
+        <div className="flex items-center gap-2 text-xs text-neutral-500 mb-3">
+          <span>{booking.vehicles?.vehicle_categories?.name || 'SUV'}</span>
+          <div className="h-3 w-px bg-neutral-300"></div>
+          <span>{booking.vehicles?.seats || 7} Seats</span>
+        </div>
+
+        {/* Customer */}
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-9 h-9 rounded-full bg-teal-500 flex items-center justify-center text-white flex-shrink-0">
+            <User className="h-4 w-4" />
+          </div>
+          <div className="min-w-0">
+            <div className="text-sm font-semibold text-neutral-900 truncate">{booking.customers?.full_name || 'N/A'}</div>
+            <div className="text-xs text-neutral-500 truncate">{booking.customers?.contact_number || ''}</div>
+          </div>
+        </div>
+
+        {/* Trip Dates - Clean horizontal layout */}
+        <div className="flex items-center gap-3 mb-4 bg-neutral-50 rounded-lg p-3">
+          <div className="flex-1 text-center">
+            <div className="text-[10px] text-neutral-500 uppercase font-semibold mb-0.5">Pickup</div>
+            <div className="text-sm font-medium text-neutral-900">
+              {new Date(booking.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            </div>
+          </div>
+          <div className="flex flex-col items-center gap-0.5 px-1">
+            <ArrowRight className="h-4 w-4 text-neutral-400" />
+            <span className="text-[10px] text-neutral-500 font-medium">{booking.rental_days}d</span>
+          </div>
+          <div className="flex-1 text-center">
+            <div className="text-[10px] text-neutral-500 uppercase font-semibold mb-0.5">Return</div>
+            <div className="text-sm font-medium text-neutral-900">
+              {endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            </div>
+          </div>
+        </div>
+
+        {/* Amount + Payment */}
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-xl font-bold text-neutral-900">₱{booking.total_amount.toLocaleString()}</div>
+            {latestPayment && (
+              <div className={`mt-1 text-xs font-medium px-2 py-0.5 rounded-full inline-block ${
+                latestPayment.payment_status === 'completed' || latestPayment.payment_status === 'paid' ? 'bg-green-100 text-green-800' : latestPayment.payment_status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-neutral-100 text-neutral-800'
+              }`}>
+                Payment: {latestPayment.payment_status.charAt(0).toUpperCase() + latestPayment.payment_status.slice(1)}
+              </div>
+            )}
+          </div>
+          <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="p-2 hover:bg-red-50 rounded-lg transition-colors text-red-500" title="Delete">
             <Trash2 className="h-4 w-4" />
           </button>
         </div>
@@ -212,7 +259,7 @@ const BookingListCard: FC<BookingListCardProps> = ({ booking, onClick, onDelete 
  */
 export const AdminBookingsPage: FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'accepted' | 'completed' | 'cancelled'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'accepted' | 'active' | 'completed' | 'cancelled'>('all');
   const [bookings, setBookings] = useState<BookingWithDetails[]>([]);
   const [filteredBookings, setFilteredBookings] = useState<BookingWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -221,6 +268,7 @@ export const AdminBookingsPage: FC = () => {
   const [isDeclineModalOpen, setIsDeclineModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<BookingWithDetails | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
 
   const fetchBookings = async () => {
     setIsLoading(true);
@@ -302,6 +350,8 @@ export const AdminBookingsPage: FC = () => {
       filtered = filtered.filter(b => b.booking_status === 'pending');
     } else if (activeTab === 'accepted') {
       filtered = filtered.filter(b => b.booking_status === 'confirmed');
+    } else if (activeTab === 'active') {
+      filtered = filtered.filter(b => b.booking_status === 'confirmed' && b.payments?.[0]?.payment_status === 'paid');
     } else if (activeTab === 'completed') {
       filtered = filtered.filter(b => b.booking_status === 'completed');
     } else if (activeTab === 'cancelled') {
@@ -456,6 +506,17 @@ export const AdminBookingsPage: FC = () => {
   return (
     <>
       <div className="bookings-container">
+        {/* Admin User Info - Above Title */}
+        <div className="user-info-top">
+          <div className="user-details">
+            <div className="user-name">Admin User</div>
+            <div className="user-role">ADMINISTRATOR</div>
+          </div>
+          <div className="user-avatar">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" alt="Admin" />
+          </div>
+        </div>
+
         {/* Page Header with Search and Actions */}
         <div className="page-header-row">
           <h1 className="page-title">Bookings Management</h1>
@@ -486,16 +547,6 @@ export const AdminBookingsPage: FC = () => {
                 Export
               </Button>
             </div>
-            <div className="vertical-divider"></div>
-            <div className="user-info-section">
-              <div className="user-details">
-                <div className="user-name">Admin User</div>
-                <div className="user-role">ADMINISTRATOR</div>
-              </div>
-              <div className="user-avatar">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" alt="Admin" />
-              </div>
-            </div>
           </div>
         </div>
 
@@ -524,6 +575,13 @@ export const AdminBookingsPage: FC = () => {
               <span className="tab-count">{bookings.filter(b => b.booking_status === 'confirmed').length}</span>
             </button>
             <button
+              onClick={() => setActiveTab('active')}
+              className={`tab-button ${activeTab === 'active' ? 'active' : ''}`}
+            >
+              Active
+              <span className="tab-count">{bookings.filter(b => b.booking_status === 'confirmed' && b.payments?.[0]?.payment_status === 'paid').length}</span>
+            </button>
+            <button
               onClick={() => setActiveTab('completed')}
               className={`tab-button ${activeTab === 'completed' ? 'active' : ''}`}
             >
@@ -539,14 +597,27 @@ export const AdminBookingsPage: FC = () => {
             </button>
           </div>
           <div className="filter-buttons">
-            <Button variant="outline" className="filter-btn">
-              <Calendar className="h-4 w-4" />
-              Filter by Date
-            </Button>
-            <Button variant="outline" className="filter-btn">
-              <Calendar className="h-4 w-4" />
-              Filter by Car
-            </Button>
+            <div className="filter-dropdown-wrapper">
+              <button className="filter-icon-btn" onClick={() => setShowFilterDropdown(!showFilterDropdown)} title="Filter">
+                <SlidersHorizontal className="h-4 w-4" />
+                <span className="filter-btn-text">Filter</span>
+              </button>
+              {showFilterDropdown && (
+                <>
+                  <div className="filter-dropdown-overlay" onClick={() => setShowFilterDropdown(false)} />
+                  <div className="filter-dropdown-menu">
+                    <button className="filter-dropdown-item" onClick={() => setShowFilterDropdown(false)}>
+                      <Calendar className="h-4 w-4" />
+                      <span>Filter by Date</span>
+                    </button>
+                    <button className="filter-dropdown-item" onClick={() => setShowFilterDropdown(false)}>
+                      <Car className="h-4 w-4" />
+                      <span>Filter by Car</span>
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
@@ -592,14 +663,6 @@ export const AdminBookingsPage: FC = () => {
         </div>
       </div>
 
-      {/* Floating Action Button */}
-      <button
-        className="floating-add-button"
-        title="Add new booking (Walk-in)"
-      >
-        <Plus className="h-6 w-6" />
-      </button>
-
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         isOpen={isDeleteDialogOpen}
@@ -640,14 +703,52 @@ export const AdminBookingsPage: FC = () => {
           display: flex;
           flex-direction: column;
           gap: 20px;
-          padding-bottom: 80px;
+          padding-bottom: 24px;
+        }
+
+        .user-info-top {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          justify-content: flex-end;
+          margin-bottom: 0;
+        }
+
+        .user-details {
+          text-align: right;
+        }
+
+        .user-name {
+          font-size: 14px;
+          font-weight: 600;
+          color: #1a1a1a;
+          line-height: 1.2;
+        }
+
+        .user-role {
+          font-size: 11px;
+          color: #9ca3af;
+          letter-spacing: 0.5px;
+        }
+
+        .user-avatar {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          overflow: hidden;
+          background: #f3f4f6;
+        }
+
+        .user-avatar img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
         }
 
         .page-header-row {
           display: flex;
           align-items: center;
           gap: 16px;
-          margin-bottom: 24px;
           background: white;
           padding: 16px 20px;
           border-radius: 8px;
@@ -728,49 +829,6 @@ export const AdminBookingsPage: FC = () => {
           color: white;
         }
 
-        .vertical-divider {
-          width: 1px;
-          height: 32px;
-          background: #e5e7eb;
-        }
-
-        .user-info-section {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-
-        .user-details {
-          text-align: right;
-        }
-
-        .user-name {
-          font-size: 14px;
-          font-weight: 600;
-          color: #1a1a1a;
-          line-height: 1.2;
-        }
-
-        .user-role {
-          font-size: 11px;
-          color: #9ca3af;
-          letter-spacing: 0.5px;
-        }
-
-        .user-avatar {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          overflow: hidden;
-          background: #f3f4f6;
-        }
-
-        .user-avatar img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-
         .tabs-container {
           display: flex;
           justify-content: space-between;
@@ -794,6 +852,75 @@ export const AdminBookingsPage: FC = () => {
         .filter-buttons {
           display: flex;
           gap: 8px;
+        }
+
+        .filter-dropdown-wrapper {
+          position: relative;
+        }
+
+        .filter-icon-btn {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 14px;
+          background: white;
+          border: 1px solid #d1d5db;
+          color: #6b7280;
+          border-radius: 6px;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .filter-icon-btn:hover {
+          background: #f9fafb;
+          border-color: #9ca3af;
+        }
+
+        .filter-icon-btn svg {
+          color: #9ca3af;
+        }
+
+        .filter-dropdown-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: 90;
+        }
+
+        .filter-dropdown-menu {
+          position: absolute;
+          top: calc(100% + 4px);
+          right: 0;
+          background: white;
+          border: 1px solid #e5e7eb;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+          z-index: 100;
+          min-width: 180px;
+          overflow: hidden;
+        }
+
+        .filter-dropdown-item {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          width: 100%;
+          padding: 10px 14px;
+          border: none;
+          background: transparent;
+          font-size: 14px;
+          color: #374151;
+          cursor: pointer;
+          transition: background 0.15s;
+        }
+
+        .filter-dropdown-item:hover {
+          background: #f3f4f6;
+        }
+
+        .filter-dropdown-item svg {
+          color: #9ca3af;
         }
 
         .filter-btn {
@@ -885,11 +1012,23 @@ export const AdminBookingsPage: FC = () => {
           border-radius: 8px;
           padding: 16px;
           transition: all 0.2s;
+          cursor: pointer;
         }
 
         .booking-list-card:hover {
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
           border-color: #d1d5db;
+        }
+
+        .booking-card-desktop {
+          display: grid;
+          grid-template-columns: 2.5fr 1.8fr 3.5fr 1.5fr auto;
+          gap: 24px;
+          align-items: center;
+        }
+
+        .booking-card-mobile {
+          display: none;
         }
 
         .status-badge {
@@ -911,6 +1050,11 @@ export const AdminBookingsPage: FC = () => {
         .status-confirmed {
           background: #d1fae5;
           color: #065f46;
+        }
+
+        .status-active {
+          background: #dbeafe;
+          color: #1e40af;
         }
 
         .status-completed {
@@ -937,34 +1081,6 @@ export const AdminBookingsPage: FC = () => {
           min-height: 400px;
         }
 
-        .floating-add-button {
-          position: fixed;
-          bottom: 32px;
-          right: 32px;
-          width: 56px;
-          height: 56px;
-          background: #E22B2B;
-          color: white;
-          border: none;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 4px 12px rgba(226, 43, 43, 0.4);
-          cursor: pointer;
-          transition: all 0.3s ease;
-          z-index: 100;
-        }
-
-        .floating-add-button:hover {
-          transform: scale(1.1);
-          box-shadow: 0 6px 20px rgba(226, 43, 43, 0.5);
-        }
-
-        .floating-add-button:active {
-          transform: scale(0.95);
-        }
-
         @keyframes slideIn {
           from {
             transform: translateX(400px);
@@ -987,29 +1103,139 @@ export const AdminBookingsPage: FC = () => {
           }
         }
 
-        @media (max-width: 640px) {
-          .page-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 16px;
+        @media (max-width: 1024px) {
+          .page-header-row {
+            flex-wrap: wrap;
           }
 
-          .user-info-section {
-            align-self: flex-end;
+          .search-section {
+            order: 3;
+            width: 100%;
+            max-width: 100%;
+          }
+
+          .action-buttons {
+            flex-wrap: wrap;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .bookings-container {
+            padding-bottom: 24px;
+          }
+
+          .page-header-row {
+            padding: 12px 16px;
+            gap: 12px;
+            flex-direction: column;
+            align-items: stretch;
           }
 
           .page-title {
-            font-size: 24px;
+            font-size: 18px;
+            min-width: auto;
+          }
+
+          .search-section {
+            max-width: 100%;
+          }
+
+          .header-actions-group {
+            width: 100%;
+            flex-direction: row;
+            gap: 8px;
+          }
+
+          .action-buttons {
+            width: 100%;
+            display: flex;
+            gap: 8px;
+          }
+
+          .refresh-button,
+          .export-button {
+            flex: 1;
+            justify-content: center;
           }
 
           .tabs-container {
             margin: 0 -16px;
-            padding: 0 16px;
+            padding: 0 8px;
+            flex-wrap: nowrap;
           }
 
-          .floating-add-button {
-            bottom: 20px;
-            right: 20px;
+          .tabs-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            flex: 1;
+            min-width: 0;
+          }
+
+          .tabs-wrapper::-webkit-scrollbar {
+            display: none;
+          }
+
+          .tab-button {
+            white-space: nowrap;
+            min-width: fit-content;
+          }
+
+          .filter-buttons {
+            flex-shrink: 0;
+            padding-right: 8px;
+          }
+
+          .filter-btn-text {
+            display: none;
+          }
+
+          .filter-icon-btn {
+            padding: 8px;
+          }
+
+          .column-headers {
+            display: none;
+          }
+
+          .booking-card-desktop {
+            display: none;
+          }
+
+          .booking-card-mobile {
+            display: block;
+          }
+
+          .booking-list-card {
+            padding: 14px;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .page-header-row {
+            padding: 10px 12px;
+          }
+
+          .page-title {
+            font-size: 16px;
+          }
+
+          .search-section input {
+            font-size: 14px;
+          }
+
+          .tabs-container {
+            padding: 0 4px;
+          }
+
+          .tab-button {
+            font-size: 12px;
+            padding: 8px 12px;
+          }
+
+          .tab-count {
+            font-size: 10px;
           }
         }
       `}</style>

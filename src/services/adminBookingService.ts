@@ -307,8 +307,16 @@ export const bookingService = {
   /**
    * Update booking status
    */
-  async updateStatus(id: string, status: Booking['booking_status']): Promise<{ data: Booking | null; error: string | null }> {
+  async updateStatus(id: string, status: Booking['booking_status'], updateVehicleStatus?: boolean): Promise<{ data: Booking | null; error: string | null }> {
     try {
+      // First get the booking to get vehicle_id
+      const { data: booking } = await supabase
+        .from('bookings')
+        .select('vehicle_id')
+        .eq('id', id)
+        .single();
+
+      // Update booking status
       const { data, error } = await supabase
         .from('bookings')
         .update({ booking_status: status, updated_at: new Date().toISOString() })
@@ -325,10 +333,61 @@ export const bookingService = {
         return { data: null, error: error.message };
       }
 
+      // Update vehicle status if needed
+      if (updateVehicleStatus && booking?.vehicle_id) {
+        const vehicleStatus = status === 'confirmed' || status === 'active' ? 'rented' : 'available';
+        await supabase
+          .from('vehicles')
+          .update({ status: vehicleStatus })
+          .eq('id', booking.vehicle_id);
+      }
+
+      // Always update vehicle to available when completing or cancelling
+      if (booking?.vehicle_id && (status === 'completed' || status === 'cancelled')) {
+        await supabase
+          .from('vehicles')
+          .update({ status: 'available' })
+          .eq('id', booking.vehicle_id);
+      }
+
       return { data: data as Booking, error: null };
     } catch (error: any) {
       console.error('Error updating booking status:', error);
       return { data: null, error: error.message || 'Failed to update booking status' };
+    }
+  },
+
+  /**
+   * Confirm payment and set booking to active
+   */
+  async confirmPayment(bookingId: string, paymentId: string): Promise<{ error: string | null }> {
+    try {
+      // Update payment status
+      const { error: paymentError } = await supabase
+        .from('payments')
+        .update({ 
+          payment_status: 'paid',
+          paid_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', paymentId);
+
+      if (paymentError) {
+        console.error('Error updating payment status:', paymentError);
+        return { error: paymentError.message };
+      }
+
+      // Update booking status to active
+      const { error: bookingError } = await this.updateStatus(bookingId, 'confirmed', true);
+
+      if (bookingError) {
+        return { error: bookingError };
+      }
+
+      return { error: null };
+    } catch (error: any) {
+      console.error('Error confirming payment:', error);
+      return { error: error.message || 'Failed to confirm payment' };
     }
   },
 

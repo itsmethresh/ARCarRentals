@@ -76,6 +76,8 @@ export const BookingDetailsViewModal: FC<BookingDetailsViewModalProps> = ({
   onStatusUpdate,
 }) => {
   const [isAccepting, setIsAccepting] = useState(false);
+  const [isConfirmingPayment, setIsConfirmingPayment] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
   const [showDeclineModal, setShowDeclineModal] = useState(false);
   const [receiptError, setReceiptError] = useState(false);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
@@ -99,8 +101,8 @@ export const BookingDetailsViewModal: FC<BookingDetailsViewModalProps> = ({
     setActionSuccess(null);
 
     try {
-      // Update booking status to confirmed
-      const { error: updateError } = await bookingService.updateStatus(booking.id, 'confirmed');
+      // Update booking status to confirmed and set vehicle to rented
+      const { error: updateError } = await bookingService.updateStatus(booking.id, 'confirmed', true);
       
       if (updateError) {
         throw new Error(updateError);
@@ -139,6 +141,103 @@ export const BookingDetailsViewModal: FC<BookingDetailsViewModalProps> = ({
     }
   };
 
+  const handleConfirmPayment = async () => {
+    if (!payment) {
+      setActionError('Payment information is missing');
+      return;
+    }
+
+    setIsConfirmingPayment(true);
+    setActionError(null);
+    setActionSuccess(null);
+
+    try {
+      const { error } = await bookingService.confirmPayment(booking.id, payment.id);
+      
+      if (error) {
+        throw new Error(error);
+      }
+
+      setActionSuccess('✅ Payment confirmed successfully! Booking is now active.');
+      
+      // Close modal and refresh list after short delay
+      setTimeout(() => {
+        onStatusUpdate?.();
+        onClose();
+      }, 2000);
+
+    } catch (error) {
+      console.error('Error confirming payment:', error);
+      setActionError(error instanceof Error ? error.message : 'Failed to confirm payment');
+    } finally {
+      setIsConfirmingPayment(false);
+    }
+  };
+
+  const handleCancelBooking = async () => {
+    if (!window.confirm('Are you sure you want to cancel this booking?')) {
+      return;
+    }
+
+    setIsCancelling(true);
+    setActionError(null);
+    setActionSuccess(null);
+
+    try {
+      const { error } = await bookingService.updateStatus(booking.id, 'cancelled');
+      
+      if (error) {
+        throw new Error(error);
+      }
+
+      setActionSuccess('✅ Booking cancelled successfully!');
+      
+      // Close modal and refresh list after short delay
+      setTimeout(() => {
+        onStatusUpdate?.();
+        onClose();
+      }, 2000);
+
+    } catch (error) {
+      console.error('Error cancelling booking:', error);
+      setActionError(error instanceof Error ? error.message : 'Failed to cancel booking');
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
+  const handleMarkComplete = async () => {
+    if (!window.confirm('Mark this booking as completed?')) {
+      return;
+    }
+
+    setIsCancelling(true);
+    setActionError(null);
+    setActionSuccess(null);
+
+    try {
+      const { error } = await bookingService.updateStatus(booking.id, 'completed');
+      
+      if (error) {
+        throw new Error(error);
+      }
+
+      setActionSuccess('✅ Booking marked as completed!');
+      
+      // Close modal and refresh list after short delay
+      setTimeout(() => {
+        onStatusUpdate?.();
+        onClose();
+      }, 2000);
+
+    } catch (error) {
+      console.error('Error completing booking:', error);
+      setActionError(error instanceof Error ? error.message : 'Failed to complete booking');
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
   const handleClose = () => {
     if (!isAccepting) {
       setActionSuccess(null);
@@ -149,31 +248,46 @@ export const BookingDetailsViewModal: FC<BookingDetailsViewModalProps> = ({
   };
 
   const getStatusBadge = () => {
+    // Check if booking is active (confirmed with paid payment)
+    const isActive = booking.booking_status === 'confirmed' && payment?.payment_status === 'paid';
+    
     const statusConfig: Record<string, { color: string; icon: any; label: string }> = {
       pending: { color: 'bg-amber-100 text-amber-800', icon: Clock, label: 'Pending' },
       confirmed: { color: 'bg-green-100 text-green-800', icon: CheckCircle, label: 'Confirmed' },
+      active: { color: 'bg-blue-100 text-blue-800', icon: CheckCircle, label: 'Active' },
       completed: { color: 'bg-neutral-100 text-neutral-800', icon: CheckCircle, label: 'Completed' },
       cancelled: { color: 'bg-red-100 text-red-800', icon: XCircle, label: 'Cancelled' },
     };
 
-    const config = statusConfig[booking.booking_status] || statusConfig.pending;
+    const statusKey = isActive ? 'active' : booking.booking_status;
+    const config = statusConfig[statusKey] || statusConfig.pending;
     const Icon = config.icon;
 
     return (
-      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${config.color}`}>
-        <Icon className="w-3.5 h-3.5" />
+      <span className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold ${config.color}`}>
+        <Icon className="w-4 h-4" />
         {config.label}
       </span>
     );
   };
 
+  // Check if booking is active
+  const isActiveBooking = booking.booking_status === 'confirmed' && payment?.payment_status === 'paid';
+
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title={`Booking #${booking.booking_reference}`} size="2xl">
-      <div className="flex items-center justify-between mb-6">
-        <p className="text-sm text-neutral-500">
+    <Modal isOpen={isOpen} onClose={handleClose} title="" size="2xl">
+      {/* Custom Title with Status Badge */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+        <h2 className="text-lg sm:text-xl font-bold text-neutral-900">
+          Booking #{booking.booking_reference}
+        </h2>
+        {getStatusBadge()}
+      </div>
+
+      <div className="mb-4 sm:mb-6">
+        <p className="text-xs sm:text-sm text-neutral-500">
           Created {new Date(booking.created_at).toLocaleString()}
         </p>
-        {getStatusBadge()}
       </div>
 
       {/* Success/Error Messages */}
@@ -192,14 +306,14 @@ export const BookingDetailsViewModal: FC<BookingDetailsViewModalProps> = ({
       )}
 
       {/* Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 items-start">
         {/* Left Column */}
         <div className="space-y-6">
           {/* Customer Information */}
-          <div className="bg-white border border-neutral-200 rounded-xl p-6">
-            <div className="flex items-center gap-2 mb-4">
+          <div className="bg-white border border-neutral-200 rounded-xl p-4 sm:p-6">
+            <div className="flex items-center gap-2 mb-3 sm:mb-4">
               <User className="h-5 w-5 text-primary-600" />
-              <h3 className="text-base font-semibold text-neutral-900">Customer Information</h3>
+              <h3 className="text-sm sm:text-base font-semibold text-neutral-900">Customer Information</h3>
             </div>
             {customer ? (
               <div className="space-y-4">
@@ -244,10 +358,10 @@ export const BookingDetailsViewModal: FC<BookingDetailsViewModalProps> = ({
           </div>
 
           {/* Vehicle Information */}
-          <div className="bg-white border border-neutral-200 rounded-xl p-6">
-            <div className="flex items-center gap-2 mb-4">
+          <div className="bg-white border border-neutral-200 rounded-xl p-4 sm:p-6">
+            <div className="flex items-center gap-2 mb-3 sm:mb-4">
               <Car className="h-5 w-5 text-primary-600" />
-              <h3 className="text-base font-semibold text-neutral-900">Vehicle Information</h3>
+              <h3 className="text-sm sm:text-base font-semibold text-neutral-900">Vehicle Information</h3>
             </div>
             {vehicle ? (
               <div className="space-y-4">
@@ -256,7 +370,7 @@ export const BookingDetailsViewModal: FC<BookingDetailsViewModalProps> = ({
                     <img
                       src={vehicle.image_url}
                       alt={`${vehicle.brand} ${vehicle.model}`}
-                      className="w-full h-48 object-cover"
+                      className="w-full h-36 sm:h-48 object-cover"
                       onError={(e) => {
                         e.currentTarget.src = 'https://via.placeholder.com/400x200?text=No+Image';
                       }}
@@ -294,10 +408,10 @@ export const BookingDetailsViewModal: FC<BookingDetailsViewModalProps> = ({
           </div>
 
           {/* Booking Details */}
-          <div className="bg-white border border-neutral-200 rounded-xl p-6">
-            <div className="flex items-center gap-2 mb-4">
+          <div className="bg-white border border-neutral-200 rounded-xl p-4 sm:p-6">
+            <div className="flex items-center gap-2 mb-3 sm:mb-4">
               <Calendar className="h-5 w-5 text-primary-600" />
-              <h3 className="text-base font-semibold text-neutral-900">Booking Details</h3>
+              <h3 className="text-sm sm:text-base font-semibold text-neutral-900">Booking Details</h3>
             </div>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -338,10 +452,10 @@ export const BookingDetailsViewModal: FC<BookingDetailsViewModalProps> = ({
         {/* Right Column */}
         <div className="space-y-6">
           {/* Payment Receipt */}
-          <div className="bg-white border border-neutral-200 rounded-xl p-6">
-            <div className="flex items-center gap-2 mb-4">
+          <div className="bg-white border border-neutral-200 rounded-xl p-4 sm:p-6">
+            <div className="flex items-center gap-2 mb-3 sm:mb-4">
               <Receipt className="h-5 w-5 text-primary-600" />
-              <h3 className="text-base font-semibold text-neutral-900">Payment Receipt</h3>
+              <h3 className="text-sm sm:text-base font-semibold text-neutral-900">Payment Receipt</h3>
             </div>
             
             {receiptUrl ? (
@@ -394,30 +508,68 @@ export const BookingDetailsViewModal: FC<BookingDetailsViewModalProps> = ({
           </div>
 
           {/* Payment Information */}
-          <div className="bg-white border border-neutral-200 rounded-xl p-6">
-            <div className="flex items-center gap-2 mb-4">
+          <div className="bg-white border border-neutral-200 rounded-xl p-4 sm:p-6">
+            <div className="flex items-center gap-2 mb-3 sm:mb-4">
               <CreditCard className="h-5 w-5 text-primary-600" />
-              <h3 className="text-base font-semibold text-neutral-900">Payment Information</h3>
+              <h3 className="text-sm sm:text-base font-semibold text-neutral-900">Payment Information</h3>
             </div>
             <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-neutral-600">Rental Days</span>
-                <span className="text-sm font-medium text-neutral-900">
+              <div>
+                <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide mb-1">Rental Days</p>
+                <p className="text-sm font-medium text-neutral-900">
                   {booking.rental_days} day(s)
-                </span>
+                </p>
               </div>
               {payment && (
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-neutral-600">Payment Status</span>
-                  <span className="text-sm font-medium text-neutral-900 capitalize">
-                    {payment.payment_status}
-                  </span>
-                </div>
+                <>
+                  <div>
+                    <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide mb-1">Payment Method</p>
+                    <p className="text-sm font-medium text-neutral-900 capitalize">
+                      {payment.payment_method.replace('-', ' ')}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide mb-1">Payment Status</p>
+                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                      payment.payment_status === 'completed' || payment.payment_status === 'paid'
+                        ? 'bg-green-100 text-green-800'
+                        : payment.payment_status === 'pending'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-neutral-100 text-neutral-800'
+                    }`}>
+                      {payment.payment_status.toUpperCase()}
+                    </span>
+                  </div>
+                  {payment.transaction_reference && (
+                    <div>
+                      <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide mb-1">Payment Reference</p>
+                      <p className="text-sm font-medium text-neutral-900 font-mono">
+                        {payment.transaction_reference}
+                      </p>
+                    </div>
+                  )}
+                  {payment.paid_at && (
+                    <div>
+                      <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide mb-1">Payment Date</p>
+                      <p className="text-sm font-medium text-neutral-900">
+                        {new Date(payment.paid_at).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </p>
+                    </div>
+                  )}
+                </>
               )}
               <div className="border-t border-neutral-200 pt-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-base font-semibold text-neutral-900">Total Amount</span>
-                  <span className="text-2xl font-bold text-primary-600">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-sm font-medium text-neutral-500 uppercase tracking-wide">Total Amount</span>
+                </div>
+                <div className="flex justify-end">
+                  <span className="text-2xl font-bold text-[#E22B2B]">
                     ₱{booking.total_amount.toLocaleString()}
                   </span>
                 </div>
@@ -427,7 +579,7 @@ export const BookingDetailsViewModal: FC<BookingDetailsViewModalProps> = ({
 
           {/* Action Buttons - Only show for pending bookings */}
           {booking.booking_status === 'pending' && (
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 sm:p-6">
               <h4 className="text-sm font-semibold text-blue-900 mb-3 flex items-center gap-2">
                 <AlertCircle className="w-4 h-4" />
                 Booking Approval Required
@@ -465,16 +617,69 @@ export const BookingDetailsViewModal: FC<BookingDetailsViewModalProps> = ({
               </div>
             </div>
           )}
+
+          {/* Payment Confirmation - Show for confirmed bookings with pending payment */}
+          {booking.booking_status === 'confirmed' && payment && payment.payment_status === 'pending' && (
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 sm:p-6">
+              <h4 className="text-sm font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4" />
+                Payment Confirmation Required
+              </h4>
+              <p className="text-xs text-blue-800 mb-4">
+                Review the payment and confirm once verified. This will activate the booking.
+              </p>
+              <div className="flex gap-3">
+                <Button
+                  onClick={handleConfirmPayment}
+                  disabled={isConfirmingPayment}
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                >
+                  {isConfirmingPayment ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                      Confirming...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="w-5 h-5 mr-2" />
+                      Confirm Payment
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Footer Actions */}
-      <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-neutral-200">
+      <div className="flex flex-col sm:flex-row sm:justify-between gap-3 mt-6 sm:mt-8 pt-6 border-t border-neutral-200">
+        {booking.booking_status !== 'completed' && (
+          isActiveBooking ? (
+            <Button
+              variant="outline"
+              onClick={handleMarkComplete}
+              disabled={isAccepting || isConfirmingPayment || isCancelling}
+              className="w-full sm:w-auto px-6 border-green-600 text-green-600 hover:bg-green-50"
+            >
+              {isCancelling ? 'Processing...' : 'Mark as Complete'}
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              onClick={handleCancelBooking}
+              disabled={isAccepting || isConfirmingPayment || isCancelling || booking.booking_status === 'cancelled'}
+              className="w-full sm:w-auto px-6 border-red-600 text-red-600 hover:bg-red-50"
+            >
+              {isCancelling ? 'Cancelling...' : 'Cancel Booking'}
+            </Button>
+          )
+        )}
         <Button
           variant="outline"
           onClick={handleClose}
-          disabled={isAccepting}
-          className="px-6"
+          disabled={isAccepting || isConfirmingPayment || isCancelling}
+          className="w-full sm:w-auto px-6 sm:ml-auto"
         >
           Close
         </Button>

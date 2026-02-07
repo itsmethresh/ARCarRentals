@@ -11,7 +11,9 @@ import {
   Globe,
   UserCog,
   Settings,
-  LogOut
+  LogOut,
+  Menu,
+  X
 } from 'lucide-react';
 import { authService } from '@services/authService';
 import { LogoutModal } from './LogoutModal';
@@ -32,6 +34,7 @@ const AdminFloatingSidebar: React.FC = () => {
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogoutClick = () => {
     setShowLogoutModal(true);
@@ -138,60 +141,74 @@ const AdminFloatingSidebar: React.FC = () => {
   ];
 
   return (
-    <aside className="admin-floating-sidebar">
-      {/* Header: Logo and Name */}
-      <div className="sidebar-header">
-        <div className="logo-container">
-          <img src="/ARCarRentals.png" alt="AR Car Rentals" className="logo" />
-          <div className="brand-name">AR Car Rentals</div>
-        </div>
-      </div>
+    <>
+      {/* Mobile Menu Toggle */}
+      <button 
+        className="mobile-menu-toggle"
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        aria-label="Toggle menu"
+      >
+        {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
 
-      {/* Navigation Sections */}
-      <div className="sidebar-content">
-        {navSections.map((section) => (
-          <div key={section.title} className="nav-section">
-            <div className="section-title">{section.title}</div>
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="mobile-overlay"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      <aside className={`admin-floating-sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
+        {/* Header: Logo and Name */}
+        <div className="sidebar-header">
+          <div className="logo-container">
+            <img src="/ARCarRentals.png" alt="AR Car Rentals" className="logo" />
+            <div className="brand-name">AR Car Rentals</div>
+          </div>
+        </div>
+
+        {/* Navigation Sections */}
+        <div className="sidebar-content">
+          {navSections.map((section) => (
+            <div key={section.title} className="nav-section">
+              <div className="section-title">{section.title}</div>
+              <div className="section-items">
+                {section.items.map((item) => (
+                  <NavLink
+                    key={item.id}
+                    to={item.href}
+                    className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <span className="nav-icon">{item.icon}</span>
+                    <span className="nav-label">{item.label}</span>
+                  </NavLink>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {/* Logout in TOOLS section */}
+          <div className="nav-section">
             <div className="section-items">
-              {section.items.map((item) => (
-                <NavLink
-                  key={item.id}
-                  to={item.href}
-                  className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-                >
-                  <span className="nav-icon">{item.icon}</span>
-                  <span className="nav-label">{item.label}</span>
-                </NavLink>
-              ))}
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  handleLogoutClick();
+                }}
+                className="nav-item logout-button"
+              >
+                <span className="nav-icon">
+                  <LogOut className="nav-icon-svg" />
+                </span>
+                <span className="nav-label">Log out</span>
+              </button>
             </div>
           </div>
-        ))}
-
-        {/* Logout in TOOLS section */}
-        <div className="nav-section">
-          <div className="section-items">
-            <button
-              onClick={handleLogoutClick}
-              className="nav-item logout-button"
-            >
-              <span className="nav-icon">
-                <LogOut className="nav-icon-svg" />
-              </span>
-              <span className="nav-label">Log out</span>
-            </button>
-          </div>
         </div>
-      </div>
 
-      {/* Logout Confirmation Modal */}
-      <LogoutModal
-        isOpen={showLogoutModal}
-        onClose={handleLogoutCancel}
-        onConfirm={handleLogoutConfirm}
-        isLoading={isLoggingOut}
-      />
-
-      <style>{`
+        <style>{`
         .admin-floating-sidebar {
           background: #ffffff;
           border-radius: 16px;
@@ -200,9 +217,12 @@ const AdminFloatingSidebar: React.FC = () => {
           width: 280px;
           display: flex;
           flex-direction: column;
-          height: fit-content;
-          max-height: 100%;
+          position: fixed;
+          top: 48px;
+          left: 48px;
+          height: calc(100vh - 96px);
           overflow: hidden;
+          z-index: 50;
         }
 
         .sidebar-header {
@@ -316,9 +336,6 @@ const AdminFloatingSidebar: React.FC = () => {
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 20px;
-          height: 20px;
-          flex-shrink: 0;
         }
 
         .nav-icon-svg {
@@ -329,20 +346,54 @@ const AdminFloatingSidebar: React.FC = () => {
         .nav-label {
           font-size: 14px;
           font-weight: 500;
-          text-align: left;
-          line-height: 1.2;
-          white-space: nowrap;
         }
 
         .logout-button {
-          margin-top: 0;
+          text-align: left;
+        }
+
+        .mobile-menu-toggle {
+          display: none;
+          position: fixed;
+          top: 20px;
+          left: 20px;
+          z-index: 1001;
+          background: #E22B2B;
+          color: white;
+          border: none;
+          border-radius: 8px;
+          padding: 10px;
+          cursor: pointer;
+          box-shadow: 0 2px 8px rgba(226, 43, 43, 0.3);
+          transition: all 0.2s;
+        }
+
+        .mobile-menu-toggle:hover {
+          background: #c71f1f;
+        }
+
+        .mobile-menu-toggle:active {
+          transform: scale(0.95);
+        }
+
+        .mobile-overlay {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 999;
         }
 
         @media (max-width: 1024px) {
           .admin-floating-sidebar {
             width: 240px;
             padding: 20px 16px;
-            margin: 16px 0 16px 16px;
+            left: 24px;
+            top: 24px;
+            height: calc(100vh - 48px);
           }
 
           .brand-name {
@@ -358,8 +409,62 @@ const AdminFloatingSidebar: React.FC = () => {
             font-size: 13px;
           }
         }
+
+        @media (max-width: 768px) {
+          .mobile-menu-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+
+          .mobile-overlay {
+            display: block;
+          }
+
+          .admin-floating-sidebar {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            height: 100vh;
+            width: 280px;
+            margin: 0;
+            border-radius: 0;
+            z-index: 1000;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+          }
+
+          .admin-floating-sidebar.mobile-open {
+            left: 0;
+          }
+
+          .sidebar-content {
+            max-height: calc(100vh - 100px);
+          }
+        }
+
+        @media (max-width: 480px) {
+          .admin-floating-sidebar {
+            width: 260px;
+          }
+
+          .mobile-menu-toggle {
+            top: 16px;
+            left: 16px;
+            padding: 8px;
+          }
+        }
       `}</style>
     </aside>
+
+      {/* Logout Confirmation Modal */}
+      <LogoutModal
+        isOpen={showLogoutModal}
+        onClose={handleLogoutCancel}
+        onConfirm={handleLogoutConfirm}
+        isLoading={isLoggingOut}
+      />
+    </>
   );
 };
 

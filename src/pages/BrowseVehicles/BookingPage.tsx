@@ -31,7 +31,7 @@ export const BookingPage: FC = () => {
   // Form state
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('+63 ');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [pickupLocation, setPickupLocation] = useState('');
   const [pickupDate, setPickupDate] = useState('');
   const [returnDate, setReturnDate] = useState('');
@@ -104,13 +104,37 @@ export const BookingPage: FC = () => {
     return `${displayHour}:${minutes} ${ampm}`;
   };
 
+  // Email validation helper
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Phone number validation helper (exactly 10 digits)
+  const isValidPhoneNumber = (phone: string) => {
+    // Remove spaces and check if exactly 10 digits
+    const cleaned = phone.replace(/\s/g, '');
+    return /^\d{10}$/.test(cleaned);
+  };
+
+  // Handle phone number input (only allow 10 digits)
+  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+    if (value.length <= 10) {
+      setPhoneNumber(value);
+      if (value.length === 10) {
+        setFormErrors(prev => ({ ...prev, phoneNumber: false }));
+      }
+    }
+  };
+
   // Handle form submission
   const handleProceedToPayment = async () => {
     // Validate required fields
     const errors = {
       fullName: !fullName.trim(),
-      email: !email.trim(),
-      phoneNumber: !phoneNumber.trim() || phoneNumber.trim() === '+63',
+      email: !email.trim() || !isValidEmail(email.trim()),
+      phoneNumber: !phoneNumber.trim() || !isValidPhoneNumber(phoneNumber),
       pickupLocation: !pickupLocation.trim(),
       pickupDate: !pickupDate,
       returnDate: !returnDate,
@@ -140,7 +164,7 @@ export const BookingPage: FC = () => {
     await updateRenterInfo({
       fullName,
       email,
-      phoneNumber,
+      phoneNumber: `+63${phoneNumber}`,
       driversLicense: '', // Not collected anymore - verified at pickup
     });
     
@@ -175,7 +199,7 @@ export const BookingPage: FC = () => {
         renterInfo: {
           fullName,
           email,
-          phoneNumber,
+          phoneNumber: `+63${phoneNumber}`,
           driversLicense: '', // Not collected - verified at pickup
         },
         driveOption,
@@ -281,7 +305,14 @@ export const BookingPage: FC = () => {
                       value={email}
                       onChange={(e) => {
                         setEmail(e.target.value);
-                        if (e.target.value.trim()) setFormErrors(prev => ({ ...prev, email: false }));
+                        if (e.target.value.trim() && isValidEmail(e.target.value.trim())) {
+                          setFormErrors(prev => ({ ...prev, email: false }));
+                        }
+                      }}
+                      onBlur={(e) => {
+                        if (e.target.value.trim() && !isValidEmail(e.target.value.trim())) {
+                          setFormErrors(prev => ({ ...prev, email: true }));
+                        }
                       }}
                       placeholder="juan@example.com"
                       className={`w-full px-4 py-3 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#E22B2B]/20 focus:border-[#E22B2B] ${
@@ -291,7 +322,7 @@ export const BookingPage: FC = () => {
                     {formErrors.email && (
                       <div className="flex items-center gap-1 mt-1 text-xs text-[#E22B2B]">
                         <AlertCircle className="h-3 w-3" />
-                        <span>Please enter your email address</span>
+                        <span>Please enter a valid email address</span>
                       </div>
                     )}
                   </div>
@@ -299,24 +330,31 @@ export const BookingPage: FC = () => {
                     <label className="block text-sm font-medium text-neutral-700 mb-1.5">
                       Phone Number
                     </label>
-                    <input
-                      type="tel"
-                      value={phoneNumber}
-                      onChange={(e) => {
-                        setPhoneNumber(e.target.value);
-                        if (e.target.value.trim() && e.target.value.trim() !== '+63') {
-                          setFormErrors(prev => ({ ...prev, phoneNumber: false }));
-                        }
-                      }}
-                      placeholder="+63 917 123 4567"
-                      className={`w-full px-4 py-3 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#E22B2B]/20 focus:border-[#E22B2B] ${
-                        formErrors.phoneNumber ? 'border-[#E22B2B] ring-2 ring-[#E22B2B]/20' : 'border-neutral-200'
-                      }`}
-                    />
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-neutral-500 font-medium pointer-events-none">
+                        +63
+                      </span>
+                      <input
+                        type="tel"
+                        value={phoneNumber}
+                        onChange={handlePhoneNumberChange}
+                        onBlur={(e) => {
+                          if (e.target.value.trim() && !isValidPhoneNumber(e.target.value)) {
+                            setFormErrors(prev => ({ ...prev, phoneNumber: true }));
+                          }
+                        }}
+                        placeholder="9171234567"
+                        maxLength={10}
+                        className={`w-full pl-14 pr-4 py-3 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#E22B2B]/20 focus:border-[#E22B2B] ${
+                          formErrors.phoneNumber ? 'border-[#E22B2B] ring-2 ring-[#E22B2B]/20' : 'border-neutral-200'
+                        }`}
+                      />
+                    </div>
+                    <p className="mt-1 text-xs text-neutral-400">Enter 10 digits after +63</p>
                     {formErrors.phoneNumber && (
                       <div className="flex items-center gap-1 mt-1 text-xs text-[#E22B2B]">
                         <AlertCircle className="h-3 w-3" />
-                        <span>Please enter your phone number</span>
+                        <span>Please enter exactly 10 digits</span>
                       </div>
                     )}
                   </div>

@@ -234,21 +234,19 @@ export const AdminDashboardPage: FC = () => {
   return (
     <>
       <div className="dashboard-container">
-        {/* Page Header */}
-        <div className="page-header">
-          <div>
-            <h1 className="page-title">Dashboard</h1>
+        {/* Admin User Info - Above Title */}
+        <div className="user-info-section">
+          <div className="user-details">
+            <div className="user-name">Admin User</div>
+            <div className="user-role">Administrator</div>
           </div>
-          <div className="user-info-section">
-            <div className="user-details">
-              <div className="user-name">Admin User</div>
-              <div className="user-role">Administrator</div>
-            </div>
-            <div className="user-avatar">
-              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" alt="Admin" />
-            </div>
+          <div className="user-avatar">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" alt="Admin" />
           </div>
         </div>
+
+        {/* Page Title */}
+        <h1 className="page-title">Dashboard</h1>
 
         {/* KPI Cards Row */}
         <div className="kpi-grid">
@@ -377,24 +375,19 @@ export const AdminDashboardPage: FC = () => {
         }
 
         /* Page Header */
-        .page-header {
+        .user-info-section {
           display: flex;
-          justify-content: space-between;
           align-items: center;
-          margin-bottom: 8px;
+          gap: 12px;
+          justify-content: flex-end;
+          margin-bottom: 4px;
         }
 
         .page-title {
           font-size: 32px;
           font-weight: 700;
           color: #1a1a1a;
-          margin: 0;
-        }
-
-        .user-info-section {
-          display: flex;
-          align-items: center;
-          gap: 12px;
+          margin: 0 0 8px 0;
         }
 
         .user-details {
@@ -688,15 +681,9 @@ export const AdminDashboardPage: FC = () => {
           }
         }
 
-        @media (max-width: 640px) {
-          .page-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 16px;
-          }
-
+        @media (max-width: 768px) {
           .user-info-section {
-            align-self: flex-end;
+            margin-bottom: 0;
           }
 
           .page-title {
@@ -704,11 +691,69 @@ export const AdminDashboardPage: FC = () => {
           }
 
           .kpi-grid {
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+          }
+
+          .kpi-card {
+            padding: 16px;
           }
 
           .kpi-value {
-            font-size: 28px;
+            font-size: 24px;
+          }
+
+          .kpi-label {
+            font-size: 12px;
+          }
+
+          .chart-card,
+          .fleet-status-card,
+          .bookings-card {
+            padding: 16px;
+          }
+
+          .bookings-table th,
+          .bookings-table td {
+            padding: 10px 8px;
+            font-size: 12px;
+          }
+
+          .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+          }
+
+          .bookings-table {
+            min-width: 500px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .kpi-grid {
+            grid-template-columns: 1fr;
+            gap: 10px;
+          }
+
+          .kpi-card {
+            padding: 14px;
+            border-radius: 12px;
+          }
+
+          .kpi-value {
+            font-size: 22px;
+          }
+
+          .page-title {
+            font-size: 22px;
+          }
+
+          .dashboard-container {
+            gap: 16px;
+          }
+
+          .chart-container {
+            margin: 0 -8px;
           }
         }
 

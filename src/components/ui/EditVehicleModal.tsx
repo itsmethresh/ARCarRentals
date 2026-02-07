@@ -47,7 +47,6 @@ interface VehicleFormData {
   brand: string;
   model: string;
   category_id: string;
-  color: string;
   transmission: 'automatic' | 'manual';
   fuel_type: 'gasoline' | 'diesel' | 'hybrid' | 'electric';
   seats: string;
@@ -71,7 +70,6 @@ export const EditVehicleModal: FC<EditVehicleModalProps> = ({
     brand: '',
     model: '',
     category_id: '',
-    color: '',
     transmission: 'automatic',
     fuel_type: 'gasoline',
     seats: '5',
@@ -130,7 +128,6 @@ export const EditVehicleModal: FC<EditVehicleModalProps> = ({
         brand: vehicle.brand || '',
         model: vehicle.model || '',
         category_id: vehicle.category_id || '',
-        color: vehicle.color || '',
         transmission: (vehicle.transmission as 'automatic' | 'manual') || 'automatic',
         fuel_type: (vehicle.fuel_type as 'gasoline' | 'diesel' | 'hybrid' | 'electric') || 'gasoline',
         seats: vehicle.seats?.toString() || '5',
@@ -241,7 +238,6 @@ export const EditVehicleModal: FC<EditVehicleModalProps> = ({
           brand: formData.brand,
           model: formData.model,
           category_id: formData.category_id || null,
-          color: formData.color || null,
           transmission: formData.transmission,
           fuel_type: formData.fuel_type,
           seats: formData.seats || '5',
@@ -337,38 +333,29 @@ export const EditVehicleModal: FC<EditVehicleModalProps> = ({
                 placeholder="e.g. Vios"
                 required
               />
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-neutral-700">
-                    Vehicle Category <span className="text-red-500">*</span>
-                  </label>
-                  {loadingCategories ? (
-                    <div className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-4 py-3 text-neutral-500 text-sm">
-                      Loading...
-                    </div>
-                  ) : (
-                    <select
-                      name="category_id"
-                      value={formData.category_id}
-                      onChange={handleChange}
-                      className="w-full rounded-lg border border-neutral-300 bg-white px-4 py-3 text-neutral-900 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-colors"
-                    >
-                      <option value="">Select Category</option>
-                      {categories.map((cat) => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.name}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                </div>
-                <Input
-                  label="Color"
-                  name="color"
-                  value={formData.color}
-                  onChange={handleChange}
-                  placeholder="e.g., White"
-                />
+              <div>
+                <label className="mb-2 block text-sm font-medium text-neutral-700">
+                  Vehicle Category <span className="text-red-500">*</span>
+                </label>
+                {loadingCategories ? (
+                  <div className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-4 py-3 text-neutral-500 text-sm">
+                    Loading...
+                  </div>
+                ) : (
+                  <select
+                    name="category_id"
+                    value={formData.category_id}
+                    onChange={handleChange}
+                    className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-3 text-neutral-900 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-colors"
+                  >
+                    <option value="">Select Category</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
             </div>
           </div>
@@ -380,7 +367,7 @@ export const EditVehicleModal: FC<EditVehicleModalProps> = ({
               <h3 className="text-base font-semibold text-neutral-900">Specifications</h3>
             </div>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-2 block text-sm font-medium text-neutral-700">
                     Transmission <span className="text-red-500">*</span>
@@ -389,9 +376,9 @@ export const EditVehicleModal: FC<EditVehicleModalProps> = ({
                     name="transmission"
                     value={formData.transmission}
                     onChange={handleChange}
-                    className="w-full rounded-lg border border-neutral-300 bg-white px-4 py-3 text-neutral-900 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-colors"
+                    className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-3 text-neutral-900 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-colors"
                   >
-                    <option value="automatic">Automatic</option>
+                    <option value="automatic">Auto</option>
                     <option value="manual">Manual</option>
                   </select>
                 </div>
@@ -403,16 +390,16 @@ export const EditVehicleModal: FC<EditVehicleModalProps> = ({
                     name="fuel_type"
                     value={formData.fuel_type}
                     onChange={handleChange}
-                    className="w-full rounded-lg border border-neutral-300 bg-white px-4 py-3 text-neutral-900 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-colors"
+                    className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-3 text-neutral-900 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-colors"
                   >
-                    <option value="gasoline">Gasoline</option>
+                    <option value="gasoline">Gas</option>
                     <option value="diesel">Diesel</option>
                     <option value="hybrid">Hybrid</option>
                     <option value="electric">Electric</option>
                   </select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Input
                     label="Seats"
@@ -420,11 +407,11 @@ export const EditVehicleModal: FC<EditVehicleModalProps> = ({
                     type="text"
                     value={formData.seats}
                     onChange={handleChange}
-                    placeholder="e.g. 5 or 7-8"
+                    placeholder="5"
                     required
                   />
                   <p className="text-xs text-neutral-500 mt-1">
-                    Enter a single number (e.g., 5) or a range (e.g., 7-8, 13-15)
+                    e.g., 5 or 7-8
                   </p>
                 </div>
                 <div>
@@ -435,11 +422,11 @@ export const EditVehicleModal: FC<EditVehicleModalProps> = ({
                     name="status"
                     value={formData.status}
                     onChange={handleChange}
-                    className="w-full rounded-lg border border-neutral-300 bg-white px-4 py-3 text-neutral-900 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-colors"
+                    className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-3 text-neutral-900 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-colors"
                   >
                     <option value="available">Available</option>
                     <option value="rented">Rented</option>
-                    <option value="maintenance">Maintenance</option>
+                    <option value="maintenance">Maint.</option>
                   </select>
                 </div>
               </div>

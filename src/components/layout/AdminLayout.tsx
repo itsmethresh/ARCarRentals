@@ -8,17 +8,51 @@ import AdminFloatingSidebar from '@components/ui/AdminFloatingSidebar';
 export const AdminLayout: FC = () => {
   return (
     <div className="min-h-screen bg-white">
-      <div className="flex gap-6 p-12 min-h-screen">
-        {/* Floating Sidebar - Sticky */}
-        <div className="sticky top-12 self-start h-[calc(100vh-6rem)]">
-          <AdminFloatingSidebar />
-        </div>
+      {/* Sidebar rendered at top level so mobile hamburger is always visible */}
+      <AdminFloatingSidebar />
 
+      <div className="admin-layout-wrapper">
         {/* Main Content Area */}
-        <main className="flex-1">
+        <main className="admin-main-content">
           <Outlet />
         </main>
       </div>
+
+      <style>{`
+        .admin-layout-wrapper {
+          display: flex;
+          gap: 24px;
+          padding: 48px;
+          padding-left: 360px;
+          min-height: 100vh;
+        }
+
+        .admin-main-content {
+          flex: 1;
+          min-width: 0;
+          max-width: 1200px;
+        }
+
+        @media (max-width: 1024px) {
+          .admin-layout-wrapper {
+            padding: 24px;
+            padding-left: 300px;
+            gap: 20px;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .admin-layout-wrapper {
+            padding: 16px;
+            padding-left: 16px;
+            padding-top: 72px;
+          }
+
+          .admin-main-content {
+            max-width: 100%;
+          }
+        }
+      `}</style>
     </div>
   );
 };

@@ -143,30 +143,19 @@ export const AdminFleetPage: FC = () => {
   return (
     <>
       <div className="fleet-container">
-        {/* Page Header */}
-        <div className="page-header">
-          <div>
-            <h1 className="page-title">Fleet Management</h1>
+        {/* Admin User Info - Above Title */}
+        <div className="user-info-section">
+          <div className="user-details">
+            <div className="user-name">Admin User</div>
+            <div className="user-role">Administrator</div>
           </div>
-          <div className="header-actions">
-            <Button 
-              className="bg-primary-600 hover:bg-primary-700 shadow-lg shadow-primary-600/30"
-              onClick={() => setIsAddModalOpen(true)}
-            >
-              <Plus className="h-5 w-5 mr-2" />
-              Add Vehicle
-            </Button>
-            <div className="user-info-section">
-              <div className="user-details">
-                <div className="user-name">Admin User</div>
-                <div className="user-role">Administrator</div>
-              </div>
-              <div className="user-avatar">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" alt="Admin" />
-              </div>
-            </div>
+          <div className="user-avatar">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" alt="Admin" />
           </div>
         </div>
+
+        {/* Page Title */}
+        <h1 className="page-title">Fleet Management</h1>
 
       {/* Stats */}
       <div className="stats-grid">
@@ -284,7 +273,7 @@ export const AdminFleetPage: FC = () => {
           </div>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
           {vehicles.map((vehicle) => (
           <div
             key={vehicle.id}
@@ -407,6 +396,15 @@ export const AdminFleetPage: FC = () => {
         isLoading={isDeleting}
         errorMessage={deleteError}
       />
+
+      {/* Floating Add Button for Mobile */}
+      <button
+        className="fleet-floating-add"
+        onClick={() => setIsAddModalOpen(true)}
+        title="Add Vehicle"
+      >
+        <Plus className="h-6 w-6" />
+      </button>
       </div>
 
       <style>{`
@@ -416,31 +414,20 @@ export const AdminFleetPage: FC = () => {
           gap: 20px;
         }
 
-        .page-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 4px;
-        }
-
         .page-title {
           font-size: 32px;
           font-weight: 700;
           color: #1a1a1a;
-          margin: 0;
+          margin: 0 0 4px 0;
           line-height: 1;
-        }
-
-        .header-actions {
-          display: flex;
-          align-items: center;
-          gap: 16px;
         }
 
         .user-info-section {
           display: flex;
           align-items: center;
           gap: 12px;
+          justify-content: flex-end;
+          margin-bottom: 4px;
         }
 
         .user-details {
@@ -507,21 +494,44 @@ export const AdminFleetPage: FC = () => {
           box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
         }
 
+        .fleet-floating-add {
+          display: flex;
+          position: fixed;
+          bottom: 32px;
+          right: 32px;
+          width: 56px;
+          height: 56px;
+          background: #E22B2B;
+          color: white;
+          border: none;
+          border-radius: 50%;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 4px 12px rgba(226, 43, 43, 0.4);
+          cursor: pointer;
+          transition: all 0.3s ease;
+          z-index: 100;
+        }
+
+        .fleet-floating-add:hover {
+          transform: scale(1.1);
+          box-shadow: 0 6px 20px rgba(226, 43, 43, 0.5);
+        }
+
         @media (max-width: 1024px) {
           .stats-grid {
             grid-template-columns: repeat(2, 1fr);
           }
         }
 
-        @media (max-width: 640px) {
-          .page-header {
-            flex-direction: column;
-            align-items: flex-start;
+        @media (max-width: 768px) {
+          .fleet-container {
             gap: 16px;
+            padding-bottom: 80px;
           }
 
           .user-info-section {
-            align-self: flex-end;
+            margin-bottom: 0;
           }
 
           .page-title {
@@ -529,7 +539,37 @@ export const AdminFleetPage: FC = () => {
           }
 
           .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+          }
+
+          .stat-card {
+            padding: 16px;
+          }
+
+          .search-card {
+            padding: 12px;
+          }
+
+          .fleet-floating-add {
+            bottom: 24px;
+            right: 24px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .page-title {
+            font-size: 22px;
+          }
+
+          .stats-grid {
             grid-template-columns: 1fr;
+            gap: 10px;
+          }
+
+          .stat-card {
+            padding: 14px;
+            border-radius: 12px;
           }
         }
       `}</style>

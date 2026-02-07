@@ -51,7 +51,7 @@ export const Modal: FC<ModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4 sm:p-6">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
@@ -61,8 +61,9 @@ export const Modal: FC<ModalProps> = ({
       {/* Modal Content */}
       <div
         className={cn(
-          'relative w-full mx-4 bg-white rounded-2xl shadow-2xl max-h-[90vh] flex flex-col',
+          'relative w-full bg-white rounded-2xl shadow-2xl max-h-[90vh] flex flex-col',
           'animate-in fade-in zoom-in-95 duration-200',
+          'sm:mx-4',
           sizeClasses[size]
         )}
       >
@@ -70,7 +71,7 @@ export const Modal: FC<ModalProps> = ({
         {showCloseButton && (
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 z-10 p-2 hover:bg-neutral-100 rounded-lg transition-colors text-neutral-500 hover:text-neutral-700"
+            className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 p-2 hover:bg-neutral-100 rounded-lg transition-colors text-neutral-500 hover:text-neutral-700"
           >
             <X className="h-5 w-5" />
           </button>
@@ -78,13 +79,13 @@ export const Modal: FC<ModalProps> = ({
 
         {/* Header - only show if title exists */}
         {title && (
-          <div className="flex items-center justify-between p-6 pb-0">
-            <h2 className="text-xl font-bold text-neutral-900">{title}</h2>
+          <div className="flex items-center justify-between p-4 sm:p-6 pb-0">
+            <h2 className="text-lg sm:text-xl font-bold text-neutral-900 pr-8">{title}</h2>
           </div>
         )}
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           {children}
         </div>
       </div>
