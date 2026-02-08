@@ -6,6 +6,7 @@ import { HowItWorksSection } from './HowItWorksSection';
 import { StatsSection } from './StatsSection';
 import { InfiniteScrollGallerySection } from './DomeGallerySection';
 import { CTASection } from './CTASection';
+import { FloatingContactButtons } from '@/components/ui/FloatingContactButtons';
 
 /**
  * Landing/Home page component
@@ -20,6 +21,7 @@ export const LandingPage: FC = () => {
       <StatsSection />
       <InfiniteScrollGallerySection />
       <CTASection />
+      <FloatingContactButtons />
     </>
   );
 };

@@ -21,6 +21,7 @@ interface LocationState {
   vehicle: Car;
   searchCriteria: {
     pickupLocation: string;
+    dropoffLocation?: string;
     pickupDate: string;
     returnDate: string;
     startTime: string;
@@ -35,17 +36,18 @@ interface LocationState {
   pricing: {
     carBasePrice: number;
     driverCost: number;
-    taxesAndFees: number;
+    pickupLocationCost?: number;
+    dropoffLocationCost?: number;
     totalPrice: number;
     rentalDays: number;
   };
   bookingId: string;
-  paymentMethod: 'gcash' | 'maya' | 'bank';
-  paymentType: 'full' | 'downpayment';
+  paymentMethod: 'gcash' | 'cash';
+  paymentType: 'pay-now' | 'pay-later';
   amountPaid: number;
   remainingBalance: number;
-  receiptFileName: string;
-  receiptFileSize: number;
+  receiptFileName?: string;
+  receiptFileSize?: number;
 }
 
 export const ReceiptSubmittedPage: React.FC = () => {
@@ -120,10 +122,13 @@ export const ReceiptSubmittedPage: React.FC = () => {
             </div>
             <div>
               <h1 className="text-3xl md:text-4xl font-black text-neutral-900 tracking-tight mb-2">
-                Receipt Submitted!
+                {paymentType === 'pay-later' ? 'Booking Submitted!' : 'Receipt Submitted!'}
               </h1>
               <p className="text-neutral-500 text-base md:text-lg">
-                We have received your receipt. Payment verification is currently in progress.
+                {paymentType === 'pay-later' 
+                  ? 'Your booking has been submitted and is awaiting confirmation from our team.'
+                  : 'We have received your receipt. Payment verification is currently in progress.'
+                }
               </p>
             </div>
           </div>
@@ -182,7 +187,7 @@ export const ReceiptSubmittedPage: React.FC = () => {
               <h3 className="text-base font-bold text-neutral-900 mb-4">Status Timeline</h3>
               
               <div className="grid grid-cols-[24px_1fr] gap-x-3">
-                {/* Step 1: Done */}
+                {/* Step 1: Done - Booking Created */}
                 <div className="flex flex-col items-center">
                   <CheckCircle2 className="w-6 h-6 text-green-600" />
                   <div className="w-0.5 bg-green-600/30 flex-1 min-h-[32px] mt-1"></div>
@@ -192,36 +197,63 @@ export const ReceiptSubmittedPage: React.FC = () => {
                   <p className="text-neutral-500 text-xs">{formatDate(new Date().toISOString())}, {getCurrentTime()}</p>
                 </div>
 
-                {/* Step 2: Done */}
-                <div className="flex flex-col items-center">
-                  <CheckCircle2 className="w-6 h-6 text-green-600" />
-                  <div className="w-0.5 bg-green-600/30 flex-1 min-h-[32px] mt-1"></div>
-                </div>
-                <div className="pb-4">
-                  <p className="text-neutral-900 text-sm font-bold">Receipt Submitted</p>
-                  <p className="text-neutral-500 text-xs">{formatDate(new Date().toISOString())} • Manual Upload</p>
-                </div>
+                {paymentType === 'pay-now' ? (
+                  <>
+                    {/* Pay Now Flow: Step 2 - Receipt Submitted */}
+                    <div className="flex flex-col items-center">
+                      <CheckCircle2 className="w-6 h-6 text-green-600" />
+                      <div className="w-0.5 bg-green-600/30 flex-1 min-h-[32px] mt-1"></div>
+                    </div>
+                    <div className="pb-4">
+                      <p className="text-neutral-900 text-sm font-bold">Receipt Submitted</p>
+                      <p className="text-neutral-500 text-xs">{formatDate(new Date().toISOString())} • Manual Upload</p>
+                    </div>
 
-                {/* Step 3: Active/Pending */}
-                <div className="flex flex-col items-center">
-                  <div className="relative flex items-center justify-center w-6 h-6 bg-orange-100 rounded-full animate-pulse">
-                    <div className="w-2.5 h-2.5 bg-orange-500 rounded-full"></div>
-                  </div>
-                  <div className="w-0.5 bg-neutral-200 flex-1 min-h-[32px] mt-1"></div>
-                </div>
-                <div className="pb-4">
-                  <p className="text-orange-600 text-sm font-bold">Payment Verification</p>
-                  <p className="text-neutral-500 text-xs">In Progress • Est. 15-30 mins</p>
-                </div>
+                    {/* Pay Now Flow: Step 3 - Payment Verification (Active) */}
+                    <div className="flex flex-col items-center">
+                      <div className="relative flex items-center justify-center w-6 h-6 bg-orange-100 rounded-full animate-pulse">
+                        <div className="w-2.5 h-2.5 bg-orange-500 rounded-full"></div>
+                      </div>
+                      <div className="w-0.5 bg-neutral-200 flex-1 min-h-[32px] mt-1"></div>
+                    </div>
+                    <div className="pb-4">
+                      <p className="text-orange-600 text-sm font-bold">Payment Verification</p>
+                      <p className="text-neutral-500 text-xs">In Progress • Est. 15-30 mins</p>
+                    </div>
 
-                {/* Step 4: Future */}
-                <div className="flex flex-col items-center">
-                  <CircleDot className="w-6 h-6 text-neutral-300" />
-                </div>
-                <div>
-                  <p className="text-neutral-400 text-sm font-medium">Booking Confirmed</p>
-                  <p className="text-neutral-400 text-xs">Pending Verification</p>
-                </div>
+                    {/* Pay Now Flow: Step 4 - Booking Confirmed (Future) */}
+                    <div className="flex flex-col items-center">
+                      <CircleDot className="w-6 h-6 text-neutral-300" />
+                    </div>
+                    <div>
+                      <p className="text-neutral-400 text-sm font-medium">Booking Confirmed</p>
+                      <p className="text-neutral-400 text-xs">Pending Verification</p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {/* Pay Later Flow: Step 2 - Awaiting Confirmation (Active) */}
+                    <div className="flex flex-col items-center">
+                      <div className="relative flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full animate-pulse">
+                        <div className="w-2.5 h-2.5 bg-blue-500 rounded-full"></div>
+                      </div>
+                      <div className="w-0.5 bg-neutral-200 flex-1 min-h-[32px] mt-1"></div>
+                    </div>
+                    <div className="pb-4">
+                      <p className="text-blue-600 text-sm font-bold">Awaiting Confirmation</p>
+                      <p className="text-neutral-500 text-xs">In Progress • Est. 1-2 hours</p>
+                    </div>
+
+                    {/* Pay Later Flow: Step 3 - Booking Confirmed (Future) */}
+                    <div className="flex flex-col items-center">
+                      <CircleDot className="w-6 h-6 text-neutral-300" />
+                    </div>
+                    <div>
+                      <p className="text-neutral-400 text-sm font-medium">Booking Confirmed</p>
+                      <p className="text-neutral-400 text-xs">Pay upon pickup</p>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
@@ -243,10 +275,28 @@ export const ReceiptSubmittedPage: React.FC = () => {
                   <Timer className="w-4 h-4 text-neutral-500 mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-bold text-neutral-800">Wait for Confirmation</p>
-                    <p className="text-xs text-neutral-500">Verification usually takes 15-30 minutes during business hours.</p>
+                    <p className="text-xs text-neutral-500">
+                      {paymentType === 'pay-later' 
+                        ? 'Our team will review and confirm your booking within 1-2 hours.'
+                        : 'Verification usually takes 15-30 minutes during business hours.'
+                      }
+                    </p>
                   </div>
                 </div>
               </div>
+              {paymentType === 'pay-later' && (
+                <div className="mt-3 pt-3 border-t border-blue-100">
+                  <div className="flex items-start gap-2">
+                    <Info className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-bold text-amber-800">Payment Reminder</p>
+                      <p className="text-xs text-amber-700">
+                        Full payment of ₱{fullTotalAmount.toLocaleString()}.00 is due upon vehicle pickup.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Action Buttons */}

@@ -13,20 +13,22 @@ import {
   QrCode,
   Building2,
   Info,
-  ArrowLeft
+  ArrowLeft,
+  CheckCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui';
 import type { Car } from '@/types';
 import { updateStep } from '@/utils/sessionManager';
 import { createSecureBooking } from '@/services/bookingSecurityService';
 
-type PaymentMethod = 'gcash' | 'maya' | 'bank-transfer';
-type PaymentType = 'full' | 'downpayment';
+type PaymentMethod = 'gcash';
+type PaymentType = 'pay-now' | 'pay-later';
 
 interface CheckoutState {
   vehicle: Car;
   searchCriteria: {
     location: string;
+    dropoffLocation?: string;
     pickupDate: string;
     returnDate: string;
     startTime: string;
@@ -42,16 +44,14 @@ interface CheckoutState {
   pricing: {
     carBasePrice: number;
     driverCost: number;
-    taxesAndFees: number;
+    pickupLocationCost?: number;
+    dropoffLocationCost?: number;
     totalPrice: number;
     rentalDays: number;
   };
   bookingId: string;
 }
 
-// Insurance and service fee constants
-const INSURANCE_FEE = 300;
-const SERVICE_FEE = 200;
 const DOWNPAYMENT_AMOUNT = 500;
 
 // Payment method configurations
@@ -63,21 +63,6 @@ const PAYMENT_METHODS = {
     qrImage: '/gcash-qr.png',
     icon: QrCode,
     scanText: 'Scan QR with GCash App',
-  },
-  maya: {
-    name: 'Maya',
-    accountName: 'Rolando Torred Jr',
-    accountNumber: '0956 662 5224',
-    qrImage: '/maya-qr.png',
-    icon: Wallet,
-    scanText: 'Scan QR with Maya App',
-  },
-  bank: {
-    name: 'Bank Transfer',
-    bankName: 'BDO Unibank',
-    accountName: 'AR Car Rentals Inc.',
-    accountNumber: '0012-3456-7890',
-    icon: Building2,
   },
 };
 
@@ -100,7 +85,7 @@ export const CheckoutPage: FC = () => {
   
   // Payment selection state
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('gcash');
-  const [paymentType, setPaymentType] = useState<PaymentType>('full');
+  const [paymentType, setPaymentType] = useState<PaymentType>('pay-now');
 
   // Redirect if no checkout data
   useEffect(() => {
@@ -115,13 +100,14 @@ export const CheckoutPage: FC = () => {
 
   const { vehicle, searchCriteria, pricing, bookingId } = state;
 
-  // Calculate breakdown
+  // Calculate breakdown - driver cost is now included in total
   const rentalCost = pricing.carBasePrice;
-  const insuranceCost = INSURANCE_FEE;
-  const serviceFee = SERVICE_FEE;
-  const fullTotalAmount = rentalCost + insuranceCost + serviceFee + pricing.driverCost;
-  const amountToPay = paymentType === 'downpayment' ? DOWNPAYMENT_AMOUNT : fullTotalAmount;
-  const remainingBalance = fullTotalAmount - DOWNPAYMENT_AMOUNT;
+  const pickupLocationCost = pricing.pickupLocationCost || 0;
+  const dropoffLocationCost = pricing.dropoffLocationCost || 0;
+  const driverCost = pricing.driverCost || 0;
+  const fullTotalAmount = rentalCost + pickupLocationCost + dropoffLocationCost + driverCost; // Driver cost now included
+  const amountToPay = fullTotalAmount;
+  const remainingBalance = 0;
 
   // Format date for display (Oct 24, 2023)
   const formatDate = (dateString: string) => {
@@ -216,7 +202,11 @@ export const CheckoutPage: FC = () => {
 
   // Handle submit
   const handleSubmit = async () => {
-    if (!receiptFile) return;
+    // For pay-now, receipt is required
+    if (paymentType === 'pay-now' && !receiptFile) {
+      setUploadError('Please upload your payment receipt');
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -225,6 +215,7 @@ export const CheckoutPage: FC = () => {
       const result = await createSecureBooking({
         searchCriteria: {
           pickupLocation: searchCriteria.location,
+          dropoffLocation: searchCriteria.dropoffLocation,
           pickupDate: searchCriteria.pickupDate,
           returnDate: searchCriteria.returnDate,
           startTime: searchCriteria.startTime,
@@ -234,8 +225,12 @@ export const CheckoutPage: FC = () => {
         renterInfo: state.renterInfo,
         driveOption: state.driveOption,
         paymentType,
-        paymentMethod,
-        receiptImage: receiptFile
+        paymentMethod: paymentType === 'pay-now' ? paymentMethod : 'gcash', // Default for pay-later
+        receiptImage: receiptFile || undefined,
+        pricing: {
+          totalAmount: fullTotalAmount,
+          amountPaid: paymentType === 'pay-now' ? amountToPay : 0
+        }
       });
 
       if (!result.success) {
@@ -264,8 +259,8 @@ export const CheckoutPage: FC = () => {
           paymentType,
           amountPaid: amountToPay,
           remainingBalance,
-          receiptFileName: receiptFile.name,
-          receiptFileSize: Math.round(receiptFile.size / 1024),
+          receiptFileName: receiptFile?.name || '',
+          receiptFileSize: receiptFile ? Math.round(receiptFile.size / 1024) : 0,
         }
       });
     } catch (error) {
@@ -341,114 +336,70 @@ export const CheckoutPage: FC = () => {
             <div className="bg-white rounded-2xl border border-neutral-200 p-8">
               
               {/* Payment Type Selection */}
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-sm font-semibold text-neutral-700">Payment Type:</span>
+              <div className="flex items-center justify-between mb-6">
+                <span className="text-sm font-semibold text-neutral-700">Payment Option:</span>
                 <div className="flex rounded-lg border border-neutral-200 overflow-hidden">
                   <button
-                    onClick={() => setPaymentType('full')}
+                    onClick={() => setPaymentType('pay-now')}
                     className={`px-5 py-2 text-sm font-medium transition-colors ${
-                      paymentType === 'full'
+                      paymentType === 'pay-now'
                         ? 'bg-[#E22B2B] text-white'
                         : 'bg-white text-neutral-600 hover:bg-neutral-50'
                     }`}
                   >
-                    Full Payment
+                    Pay Now
                   </button>
                   <button
-                    onClick={() => setPaymentType('downpayment')}
+                    onClick={() => setPaymentType('pay-later')}
                     className={`px-5 py-2 text-sm font-medium transition-colors ${
-                      paymentType === 'downpayment'
+                      paymentType === 'pay-later'
                         ? 'bg-[#E22B2B] text-white'
                         : 'bg-white text-neutral-600 hover:bg-neutral-50'
                     }`}
                   >
-                    Downpayment
+                    Pay Later
                   </button>
                 </div>
               </div>
 
-              {/* Downpayment Notice */}
-              {paymentType === 'downpayment' && (
+              {/* Pay Later Notice */}
+              {paymentType === 'pay-later' && (
                 <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-100 rounded-xl mb-6">
                   <Info className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-blue-800">
-                    You have selected <span className="font-bold">Downpayment</span>. Each booking requires a minimum <span className="font-bold">₱500.00</span> deposit to confirm. The remaining balance will be paid upon pickup.
-                  </p>
-                </div>
-              )}
-
-              {/* Payment Method Tabs */}
-              <div className="flex justify-center mb-6">
-                <div className="inline-flex items-center bg-neutral-100 rounded-full p-1">
-                  <button
-                    onClick={() => setPaymentMethod('gcash')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                      paymentMethod === 'gcash'
-                        ? 'bg-white text-neutral-900 shadow-sm'
-                        : 'text-neutral-500 hover:text-neutral-700'
-                    }`}
-                  >
-                    <QrCode className="w-4 h-4" />
-                    GCash
-                  </button>
-                  <button
-                    onClick={() => setPaymentMethod('maya')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                      paymentMethod === 'maya'
-                        ? 'bg-white text-neutral-900 shadow-sm'
-                        : 'text-neutral-500 hover:text-neutral-700'
-                    }`}
-                  >
-                    <Wallet className="w-4 h-4" />
-                    Maya
-                  </button>
-                  <button
-                    onClick={() => setPaymentMethod('bank-transfer')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                      paymentMethod === 'bank-transfer'
-                        ? 'bg-white text-neutral-900 shadow-sm'
-                        : 'text-neutral-500 hover:text-neutral-700'
-                    }`}
-                  >
-                    <Building2 className="w-4 h-4" />
-                    Bank Transfer
-                  </button>
-                </div>
-              </div>
-
-              {/* Bank Transfer Details */}
-              {paymentMethod === 'bank-transfer' && (
-                <div className="mb-6">
-                  <div className="bg-neutral-50 rounded-xl p-6 border border-neutral-200">
-                    <h3 className="font-semibold text-neutral-900 mb-4">Bank Account Details</h3>
-                    <div className="space-y-3 text-sm">
-                      <div>
-                        <span className="text-neutral-500">Account Name:</span>
-                        <p className="font-medium text-neutral-900">Rolando Torred Jr</p>
-                      </div>
-                      <div>
-                        <span className="text-neutral-500">Contact Number:</span>
-                        <p className="font-medium text-neutral-900">0956 662 5224</p>
-                      </div>
-                      <div className="mt-4 p-3 bg-amber-50 rounded-lg border border-amber-200">
-                        <p className="text-xs text-amber-800">
-                          ⚠️ Please transfer to the account name and contact number above, then upload your payment proof.
-                        </p>
-                      </div>
-                    </div>
+                  <div>
+                    <p className="text-sm text-blue-800 font-medium">Pay Later Selected</p>
+                    <p className="text-sm text-blue-700 mt-1">
+                      Your booking will be submitted for admin approval. You will receive a confirmation email once approved. 
+                      Full payment will be collected upon vehicle pickup.
+                    </p>
                   </div>
                 </div>
               )}
 
-              {/* QR Code Section (for GCash and Maya) */}
-              {(paymentMethod === 'gcash' || paymentMethod === 'maya') && (
+              {/* GCash Payment Section - Only show for Pay Now */}
+              {paymentType === 'pay-now' && (
                 <>
+                  {/* Payment Method Header */}
+                  <div className="flex justify-center mb-6">
+                    <div className="inline-flex items-center bg-neutral-100 rounded-full p-1">
+                      <div className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-white text-neutral-900 shadow-sm">
+                        <QrCode className="w-4 h-4" />
+                        GCash Payment
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* QR Code Section */}
                   <div className="flex justify-center mb-4">
-                    <div className="p-3 border-2 border-[#E22B2B]/20 rounded-2xl">
+                    <div className="p-3 border-2 border-[#E22B2B]/20 rounded-2xl bg-white">
                       <img 
-                        src={PAYMENT_METHODS[paymentMethod].qrImage} 
-                        alt={`${PAYMENT_METHODS[paymentMethod].name} QR Code`} 
+                        src="/gcash-qr.png" 
+                        alt="GCash QR Code" 
                         className="w-44 h-44 object-contain rounded-lg"
+                        onError={(e) => {
+                          console.error('QR image failed to load');
+                          e.currentTarget.style.display = 'none';
+                        }}
                       />
                     </div>
                   </div>
@@ -459,14 +410,14 @@ export const CheckoutPage: FC = () => {
                       href="#" 
                       className="text-[#E22B2B] text-sm font-medium hover:underline flex items-center gap-1.5"
                     >
-                      <span className="text-base">📱</span> {PAYMENT_METHODS[paymentMethod].scanText}
+                      <span className="text-base">📱</span> Scan QR with GCash App
                     </a>
                   </div>
                 </>
               )}
 
               {/* Bank Transfer Details */}
-              {paymentMethod === 'bank-transfer' && (
+              {paymentMethod === 'bank-transfer' && paymentType === 'pay-now' && (
                 <div className="bg-neutral-50 border border-neutral-200 rounded-xl p-6 mb-8">
                   <div className="text-center mb-4">
                     <Building2 className="w-12 h-12 text-[#E22B2B] mx-auto mb-2" />
@@ -474,19 +425,15 @@ export const CheckoutPage: FC = () => {
                   </div>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center py-2 border-b border-neutral-200">
-                      <span className="text-sm text-neutral-500">Bank Name</span>
-                      <span className="font-semibold text-neutral-900">{PAYMENT_METHODS.bank.bankName}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-2 border-b border-neutral-200">
                       <span className="text-sm text-neutral-500">Account Name</span>
-                      <span className="font-semibold text-neutral-900">{PAYMENT_METHODS.bank.accountName}</span>
+                      <span className="font-semibold text-neutral-900">{PAYMENT_METHODS.gcash.accountName}</span>
                     </div>
                     <div className="flex justify-between items-center py-2">
                       <span className="text-sm text-neutral-500">Account Number</span>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-neutral-900">{PAYMENT_METHODS.bank.accountNumber}</span>
+                        <span className="font-semibold text-neutral-900">{PAYMENT_METHODS.gcash.accountNumber}</span>
                         <button 
-                          onClick={() => copyToClipboard(PAYMENT_METHODS.bank.accountNumber.replace(/-/g, ''))}
+                          onClick={() => copyToClipboard(PAYMENT_METHODS.gcash.accountNumber.replace(/-/g, ''))}
                           className="text-neutral-400 hover:text-[#E22B2B] transition-colors"
                           title={isCopied ? "Copied!" : "Copy number"}
                         >
@@ -502,7 +449,8 @@ export const CheckoutPage: FC = () => {
                 </div>
               )}
 
-              {/* Steps */}
+              {/* Steps - Only for Pay Now */}
+              {paymentType === 'pay-now' && (
               <div className="space-y-6">
                 {/* Step 1 */}
                 <div className="flex items-start gap-4">
@@ -510,14 +458,9 @@ export const CheckoutPage: FC = () => {
                     1
                   </div>
                   <div>
-                    <p className="font-bold text-neutral-900">
-                      {paymentMethod === 'bank-transfer' ? 'Transfer to Our Account' : 'Scan the QR Code'}
-                    </p>
+                    <p className="font-bold text-neutral-900">Scan the QR Code</p>
                     <p className="text-sm text-neutral-500">
-                      {paymentMethod === 'bank-transfer' 
-                        ? 'Use your mobile banking app or visit your bank to transfer the payment.'
-                        : `Open your ${PAYMENT_METHODS[paymentMethod].name} app, tap "QR Pay", and scan the code above.`
-                      }
+                      Open your GCash app, tap "QR Pay", and scan the code above.
                     </p>
                   </div>
                 </div>
@@ -531,48 +474,36 @@ export const CheckoutPage: FC = () => {
                     <p className="font-bold text-neutral-900">Send Exact Amount</p>
                     <p className="text-sm text-neutral-500 mb-4">Please ensure you send the exact total amount.</p>
                     
-                    {/* Account Details Box (for GCash and Maya) */}
-                    {(paymentMethod === 'gcash' || paymentMethod === 'maya') && (
-                      <div className="bg-neutral-50 border border-neutral-200 rounded-xl p-4">
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <p className="text-[10px] text-neutral-400 uppercase tracking-wider font-medium">{PAYMENT_METHODS[paymentMethod].name.toUpperCase()} ACCOUNT</p>
-                            <p className="font-semibold text-neutral-900">{PAYMENT_METHODS[paymentMethod].accountName}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-[10px] text-neutral-400 uppercase tracking-wider font-medium">NUMBER</p>
-                            <div className="flex items-center gap-2">
-                              <p className="font-semibold text-neutral-900">{PAYMENT_METHODS[paymentMethod].accountNumber}</p>
-                              <button 
-                                onClick={() => copyToClipboard(PAYMENT_METHODS[paymentMethod].accountNumber.replace(/-/g, ''))}
-                                className="relative text-neutral-400 hover:text-[#E22B2B] transition-colors"
-                                title={isCopied ? "Copied!" : "Copy number"}
-                              >
-                                {isCopied ? (
-                                  <Check className="w-4 h-4 text-green-500" />
-                                ) : (
-                                  <Copy className="w-4 h-4" />
-                                )}
-                              </button>
-                            </div>
+                    {/* Account Details Box */}
+                    <div className="bg-neutral-50 border border-neutral-200 rounded-xl p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <p className="text-[10px] text-neutral-400 uppercase tracking-wider font-medium">GCASH ACCOUNT</p>
+                          <p className="font-semibold text-neutral-900">{PAYMENT_METHODS.gcash.accountName}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[10px] text-neutral-400 uppercase tracking-wider font-medium">NUMBER</p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-semibold text-neutral-900">{PAYMENT_METHODS.gcash.accountNumber}</p>
+                            <button 
+                              onClick={() => copyToClipboard(PAYMENT_METHODS.gcash.accountNumber.replace(/-/g, ''))}
+                              className="relative text-neutral-400 hover:text-[#E22B2B] transition-colors"
+                              title={isCopied ? "Copied!" : "Copy number"}
+                            >
+                              {isCopied ? (
+                                <Check className="w-4 h-4 text-green-500" />
+                              ) : (
+                                <Copy className="w-4 h-4" />
+                              )}
+                            </button>
                           </div>
                         </div>
-                        <div className="flex justify-between items-center pt-3 border-t border-neutral-200">
-                          <p className="text-sm text-neutral-500">Total to send:</p>
-                          <p className="text-xl font-bold text-[#E22B2B]">₱{amountToPay.toLocaleString()}.00</p>
-                        </div>
                       </div>
-                    )}
-
-                    {/* Amount Box (for Bank Transfer) */}
-                    {paymentMethod === 'bank-transfer' && (
-                      <div className="bg-neutral-50 border border-neutral-200 rounded-xl p-4">
-                        <div className="flex justify-between items-center">
-                          <p className="text-sm text-neutral-500">Total to send:</p>
-                          <p className="text-xl font-bold text-[#E22B2B]">₱{amountToPay.toLocaleString()}.00</p>
-                        </div>
+                      <div className="flex justify-between items-center pt-3 border-t border-neutral-200">
+                        <p className="text-sm text-neutral-500">Total to send:</p>
+                        <p className="text-xl font-bold text-[#E22B2B]">₱{amountToPay.toLocaleString()}.00</p>
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
 
@@ -651,6 +582,7 @@ export const CheckoutPage: FC = () => {
                   </div>
                 </div>
               </div>
+              )}
             </div>
           </div>
 
@@ -708,70 +640,82 @@ export const CheckoutPage: FC = () => {
                   <span className="text-neutral-600">Car Rental ({pricing.rentalDays} day{pricing.rentalDays > 1 ? 's' : ''})</span>
                   <span className="text-neutral-900">₱{rentalCost.toLocaleString()}.00</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-neutral-600">Insurance</span>
-                  <span className="text-neutral-900">₱{insuranceCost.toLocaleString()}.00</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-neutral-600">Service Fee</span>
-                  <span className="text-neutral-900">₱{serviceFee.toLocaleString()}.00</span>
-                </div>
-                {pricing.driverCost > 0 && (
+                {pickupLocationCost > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-neutral-600">Pickup ({searchCriteria.location})</span>
+                    <span className="text-neutral-900">₱{pickupLocationCost.toLocaleString()}.00</span>
+                  </div>
+                )}
+                {dropoffLocationCost > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-neutral-600">Drop-off ({searchCriteria.dropoffLocation})</span>
+                    <span className="text-neutral-900">₱{dropoffLocationCost.toLocaleString()}.00</span>
+                  </div>
+                )}
+                {driverCost > 0 && (
                   <div className="flex justify-between">
                     <span className="text-neutral-600">Driver Fee</span>
-                    <span className="text-neutral-900">₱{pricing.driverCost.toLocaleString()}.00</span>
+                    <span className="text-neutral-900">₱{driverCost.toLocaleString()}.00</span>
                   </div>
                 )}
               </div>
 
               {/* Total */}
               <div className="pt-4 border-t border-neutral-200 mb-4">
-                <div className="flex justify-between items-center mb-2">
+                <div className="flex justify-between items-center">
                   <span className="text-sm text-neutral-600">Total Amount</span>
                   <span className="font-semibold text-neutral-900">₱{fullTotalAmount.toLocaleString()}.00</span>
                 </div>
-                
-                {paymentType === 'downpayment' && (
-                  <>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm text-neutral-600">Downpayment</span>
-                      <span className="font-semibold text-[#E22B2B]">₱{DOWNPAYMENT_AMOUNT.toLocaleString()}.00</span>
-                    </div>
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-neutral-500">Balance (pay upon pickup)</span>
-                      <span className="text-neutral-500">₱{remainingBalance.toLocaleString()}.00</span>
-                    </div>
-                  </>
-                )}
               </div>
 
-              {/* Amount to Pay Now */}
-              <div className="bg-red-50 rounded-lg p-4 mb-6">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-neutral-700">
-                    {paymentType === 'downpayment' ? 'Pay Now (Deposit)' : 'Pay Now'}
-                  </span>
-                  <span className="text-2xl font-bold text-[#E22B2B]">₱{amountToPay.toLocaleString()}.00</span>
+              {/* Amount to Pay Now - Only for Pay Now */}
+              {paymentType === 'pay-now' && (
+                <div className="rounded-lg p-4 mb-6 bg-red-50">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-neutral-700">Pay Now</span>
+                    <span className="text-2xl font-bold text-[#E22B2B]">
+                      ₱{amountToPay.toLocaleString()}.00
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-500 mt-1">
+                    via {PAYMENT_METHODS[paymentMethod].name}
+                  </p>
                 </div>
-                <p className="text-xs text-neutral-500 mt-1">
-                  via {paymentMethod === 'bank-transfer' ? 'Bank Transfer' : PAYMENT_METHODS[paymentMethod].name}
-                </p>
-              </div>
+              )}
+
+              {/* Pay Later Note */}
+              {paymentType === 'pay-later' && (
+                <div className="rounded-lg p-4 mb-6 bg-blue-50">
+                  <p className="text-sm text-blue-800 font-medium">Payment on Pickup</p>
+                  <p className="text-xs text-blue-600 mt-1">
+                    Full payment of ₱{fullTotalAmount.toLocaleString()}.00 due upon vehicle pickup
+                  </p>
+                </div>
+              )}
 
               {/* Submit Button */}
               <Button
                 variant="primary"
                 fullWidth
                 onClick={handleSubmit}
-                disabled={!receiptFile || isSubmitting}
+                disabled={(paymentType === 'pay-now' && !receiptFile) || isSubmitting}
                 className={`py-3.5 text-base font-medium rounded-lg flex items-center justify-center gap-2 ${
-                  receiptFile && !isSubmitting
+                  ((paymentType === 'pay-now' && receiptFile) || paymentType === 'pay-later') && !isSubmitting
                     ? 'bg-[#E22B2B] hover:bg-[#c92525] border-none'
                     : 'bg-neutral-300 cursor-not-allowed border-none'
                 }`}
               >
-                <Lock className="w-4 h-4" />
-                {isSubmitting ? 'Submitting...' : 'Submit Payment Receipt'}
+                {paymentType === 'pay-now' ? (
+                  <>
+                    <Lock className="w-4 h-4" />
+                    {isSubmitting ? 'Submitting...' : 'Submit Payment Receipt'}
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-4 h-4" />
+                    {isSubmitting ? 'Submitting...' : 'Confirm Booking'}
+                  </>
+                )}
               </Button>
 
               {/* Terms */}

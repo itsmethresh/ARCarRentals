@@ -15,13 +15,17 @@ import type { SearchCriteria, RenterInfo } from '../utils/sessionManager';
 import type { Car } from '../types';
 
 export interface BookingPayload {
-  searchCriteria: SearchCriteria;
+  searchCriteria: SearchCriteria & { dropoffLocation?: string };
   vehicle: Car;
   renterInfo: RenterInfo;
   driveOption: 'self-drive' | 'with-driver';
-  paymentType: 'full' | 'downpayment';
-  paymentMethod: 'gcash' | 'maya' | 'bank-transfer';
-  receiptImage: File;
+  paymentType: 'pay-now' | 'pay-later';
+  paymentMethod: 'gcash';
+  receiptImage?: File;
+  pricing?: {
+    totalAmount: number;
+    amountPaid: number;
+  };
 }
 
 export interface BookingResponse {
@@ -47,14 +51,23 @@ export const createSecureBooking = async (payload: BookingPayload): Promise<Book
     // Calculate token expiry
     const expiryDate = calculateExpiryDate(payload.searchCriteria.returnDate);
     
-    // Calculate total amount
-    const dailyRate = payload.driveOption === 'with-driver' 
-      ? payload.vehicle.pricePerDay + 500
-      : payload.vehicle.pricePerDay;
-    
+    // Calculate rental days
     const days = calculateDays(payload.searchCriteria.pickupDate, payload.searchCriteria.returnDate);
-    const totalAmount = dailyRate * days;
-    const amountPaid = payload.paymentType === 'downpayment' ? 500 : totalAmount;
+    
+    // Use pricing from frontend if provided, otherwise calculate basic total
+    let totalAmount: number;
+    let amountPaid: number;
+    
+    if (payload.pricing) {
+      // Use the pre-calculated pricing from frontend (includes pickup location cost, etc.)
+      // Note: Driver cost is paid separately to driver, not included in total
+      totalAmount = payload.pricing.totalAmount;
+      amountPaid = payload.pricing.amountPaid;
+    } else {
+      // Fallback: Basic calculation (car price only - driver cost paid separately)
+      totalAmount = payload.vehicle.pricePerDay * days;
+      amountPaid = payload.paymentType === 'downpayment' ? 500 : totalAmount;
+    }
     
     console.log('📝 Creating booking with data:', {
       bookingReference,
@@ -63,13 +76,19 @@ export const createSecureBooking = async (payload: BookingPayload): Promise<Book
       returnDate: payload.searchCriteria.returnDate,
       days,
       totalAmount,
-      amountPaid
+      amountPaid,
+      paymentType: payload.paymentType
     });
     
-    // Upload receipt image first
-    console.log('📤 Uploading receipt...');
-    const receiptUrl = await uploadReceipt(payload.receiptImage, bookingReference);
-    console.log('✅ Receipt uploaded:', receiptUrl);
+    // Upload receipt image first (only for pay-now)
+    let receiptUrl: string | null = null;
+    if (payload.paymentType === 'pay-now' && payload.receiptImage) {
+      console.log('📤 Uploading receipt...');
+      receiptUrl = await uploadReceipt(payload.receiptImage, bookingReference);
+      console.log('✅ Receipt uploaded:', receiptUrl);
+    } else {
+      console.log('ℹ️ Pay later - no receipt to upload');
+    }
     
     // Insert customer
     console.log('👤 Creating customer...');
@@ -92,6 +111,10 @@ export const createSecureBooking = async (payload: BookingPayload): Promise<Book
     
     // Insert booking
     console.log('📅 Creating booking...');
+    // For pay-later, status is 'pending' (awaiting admin confirmation)
+    // For pay-now, status is 'pending' (awaiting payment verification)
+    const bookingStatus = 'pending';
+    
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
       .insert({
@@ -99,12 +122,13 @@ export const createSecureBooking = async (payload: BookingPayload): Promise<Book
         customer_id: customer.id,
         vehicle_id: payload.vehicle.id,
         pickup_location: payload.searchCriteria.pickupLocation,
+        dropoff_location: payload.searchCriteria.dropoffLocation || payload.searchCriteria.pickupLocation,
         start_date: payload.searchCriteria.pickupDate,
         start_time: payload.searchCriteria.startTime,
         pickup_time: payload.searchCriteria.startTime,
         rental_days: days,
         total_amount: totalAmount,
-        booking_status: 'pending',
+        booking_status: bookingStatus,
         magic_token_hash: tokenHash,
         token_expires_at: expiryDate,
         agreed_to_terms: true
@@ -120,14 +144,18 @@ export const createSecureBooking = async (payload: BookingPayload): Promise<Book
     console.log('✅ Booking created:', booking.id);
     
     // Insert payment
+    // Map frontend payment types to database values
+    const dbPaymentType = payload.paymentType === 'pay-now' ? 'full' : 'downpayment';
+    // Use 'pending' for both - database only allows: pending, paid, failed, refunded
+    const paymentStatus = 'pending';
     const { error: paymentError } = await supabase
       .from('payments')
       .insert({
         booking_id: booking.id,
         amount: amountPaid,
-        payment_type: payload.paymentType,
-        payment_method: payload.paymentMethod,
-        payment_status: 'pending',
+        payment_type: dbPaymentType,
+        payment_method: payload.paymentType === 'pay-later' ? 'cash' : payload.paymentMethod,
+        payment_status: paymentStatus,
         payment_proof_url: receiptUrl,
         receipt_url: receiptUrl
       });

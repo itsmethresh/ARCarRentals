@@ -19,6 +19,7 @@ export interface Booking {
   start_time?: string;
   rental_days: number;
   pickup_location?: string;
+  dropoff_location?: string;
   pickup_time?: string;
   total_amount: number;
   booking_status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'refund_pending' | 'refunded';
@@ -370,6 +371,26 @@ export const bookingService = {
     } catch (error: any) {
       console.error('Error confirming payment:', error);
       return { error: error.message || 'Failed to confirm payment' };
+    }
+  },
+
+  /**
+   * Confirm a pay-later booking (no payment verification required)
+   * Sets booking status to 'confirmed' without changing payment status
+   */
+  async confirmPayLaterBooking(bookingId: string): Promise<{ error: string | null }> {
+    try {
+      // Just update booking status to confirmed
+      const { error: bookingError } = await this.updateStatus(bookingId, 'confirmed', true);
+
+      if (bookingError) {
+        return { error: bookingError };
+      }
+
+      return { error: null };
+    } catch (error: any) {
+      console.error('Error confirming pay-later booking:', error);
+      return { error: error.message || 'Failed to confirm booking' };
     }
   },
 
