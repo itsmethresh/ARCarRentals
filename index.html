@@ -20,6 +20,104 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
     
     <title>AR Car Rental Services | Best Car Rental & Tour Services in Cebu City</title>
+    
+    <!-- JSON-LD Schema Markup -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": ["LocalBusiness", "AutoRental"],
+          "@id": "https://arcarrentalscebu.com/#business",
+          "name": "AR Car Rentals & Tour Services Cebu",
+          "description": "Affordable self-drive car rental and tour services in Lapu-Lapu, Mactan, and Cebu.",
+          "url": "https://arcarrentalscebu.com",
+          "telephone": "+639423943545",
+          "priceRange": "₱1800 - ₱5000",
+          "image": "https://arcarrentalscebu.com/ARCarRentals.png",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://arcarrentalscebu.com/ARCarRentals.png"
+          },
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "428 Bonifacio St",
+            "addressLocality": "Lapu-Lapu City",
+            "addressRegion": "Cebu",
+            "postalCode": "6015",
+            "addressCountry": "PH"
+          },
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": 10.3103,
+            "longitude": 123.9494
+          },
+          "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+            "opens": "00:00",
+            "closes": "23:59"
+          },
+          "sameAs": [
+            "https://www.facebook.com/arcarrentalsservicescebu"
+          ],
+          "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "Car Rental & Tour Services",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Self Drive",
+                  "description": "Rent a car and drive yourself around Cebu and Mactan."
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "With Driver",
+                  "description": "Car rental with a professional driver for hassle-free travel."
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Airport Pickup",
+                  "description": "Convenient airport pickup and drop-off services."
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "City Tours",
+                  "description": "Guided city tours to explore the best of Cebu."
+                }
+              }
+            ]
+          },
+          "potentialAction": {
+            "@type": "ReserveAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://arcarrentalscebu.com/contact",
+              "actionPlatform": [
+                "http://schema.org/DesktopWebPlatform",
+                "http://schema.org/MobileWebPlatform"
+              ]
+            },
+            "result": {
+              "@type": "Reservation",
+              "name": "Car Rental Reservation"
+            }
+          }
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
