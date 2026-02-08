@@ -1,28 +1,132 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/ARCarRentals.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="AR Car Rental Services - Best car rental and tour services in Cebu City, Philippines. Affordable rates, well-maintained vehicles, and excellent service." />
-    <meta name="keywords" content="car rental, Cebu, Philippines, tour services, vehicle rental, travel" />
-    <meta name="author" content="AR Car Rental Services" />
-    <meta name="theme-color" content="#dc2626" />
-    
-    <!-- Open Graph / Social Media -->
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="AR Car Rental Services - Cebu City" />
-    <meta property="og:description" content="Best car rental and tour services in Cebu City" />
-    
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
-    
-    <title>AR Car Rental Services | Best Car Rental & Tour Services in Cebu City</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/ARCarRentals.png?v=2" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="AR Car Rental Services - Best car rental and tour services in Cebu City, Philippines. Affordable rates, well-maintained vehicles, and excellent service." />
+  <meta name="keywords" content="car rental, Cebu, Philippines, tour services, vehicle rental, travel" />
+  <meta name="author" content="AR Car Rental Services" />
+  <meta name="theme-color" content="#dc2626" />
+
+  <!-- Open Graph / Social Media -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="AR Car Rental Services - Cebu City" />
+  <meta property="og:description" content="Best car rental and tour services in Cebu City" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap"
+    rel="stylesheet" />
+
+  <title>AR Car Rental Services | Best Car Rental & Tour Services in Cebu City</title>
+
+  <!-- JSON-LD Schema Markup -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": ["LocalBusiness", "AutoRental"],
+          "@id": "https://arcarrentalscebu.com/#business",
+          "name": "AR Car Rentals & Tour Services Cebu",
+          "description": "Affordable self-drive car rental and tour services in Lapu-Lapu, Mactan, and Cebu.",
+          "url": "https://arcarrentalscebu.com",
+          "telephone": "+639423943545",
+          "priceRange": "₱1800 - ₱5000",
+          "image": "https://arcarrentalscebu.com/ARCarRentals.png",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://arcarrentalscebu.com/ARCarRentals.png"
+          },
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "428 Bonifacio St",
+            "addressLocality": "Lapu-Lapu City",
+            "addressRegion": "Cebu",
+            "postalCode": "6015",
+            "addressCountry": "PH"
+          },
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": 10.3103,
+            "longitude": 123.9494
+          },
+          "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+            "opens": "00:00",
+            "closes": "23:59"
+          },
+          "sameAs": [
+            "https://www.facebook.com/arcarrentalsservicescebu"
+          ],
+          "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "Car Rental & Tour Services",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Self Drive",
+                  "description": "Rent a car and drive yourself around Cebu and Mactan."
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "With Driver",
+                  "description": "Car rental with a professional driver for hassle-free travel."
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Airport Pickup",
+                  "description": "Convenient airport pickup and drop-off services."
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "City Tours",
+                  "description": "Guided city tours to explore the best of Cebu."
+                }
+              }
+            ]
+          },
+          "potentialAction": {
+            "@type": "ReserveAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://arcarrentalscebu.com/contact",
+              "actionPlatform": [
+                "http://schema.org/DesktopWebPlatform",
+                "http://schema.org/MobileWebPlatform"
+              ]
+            },
+            "result": {
+              "@type": "Reservation",
+              "name": "Car Rental Reservation"
+            }
+          }
+        }
+      ]
+    }
+    </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>
