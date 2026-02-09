@@ -4,12 +4,12 @@
 
 import { supabase } from './supabase';
 import { sendMagicLinkEmail } from './emailService';
-import { 
-  generateBookingReference, 
-  generateMagicToken, 
+import {
+  generateBookingReference,
+  generateMagicToken,
   hashToken,
   calculateExpiryDate,
-  isTokenExpired 
+  isTokenExpired
 } from '../utils/security';
 import type { SearchCriteria, RenterInfo } from '../utils/sessionManager';
 import type { Car } from '../types';
@@ -43,21 +43,21 @@ export const createSecureBooking = async (payload: BookingPayload): Promise<Book
   try {
     // Generate booking reference
     const bookingReference = generateBookingReference();
-    
+
     // Generate magic token
     const magicToken = generateMagicToken();
     const tokenHash = await hashToken(magicToken);
-    
+
     // Calculate token expiry
     const expiryDate = calculateExpiryDate(payload.searchCriteria.returnDate);
-    
+
     // Calculate rental days
     const days = calculateDays(payload.searchCriteria.pickupDate, payload.searchCriteria.returnDate);
-    
+
     // Use pricing from frontend if provided, otherwise calculate basic total
     let totalAmount: number;
     let amountPaid: number;
-    
+
     if (payload.pricing) {
       // Use the pre-calculated pricing from frontend (includes pickup location cost, etc.)
       // Note: Driver cost is paid separately to driver, not included in total
@@ -66,9 +66,9 @@ export const createSecureBooking = async (payload: BookingPayload): Promise<Book
     } else {
       // Fallback: Basic calculation (car price only - driver cost paid separately)
       totalAmount = payload.vehicle.pricePerDay * days;
-      amountPaid = payload.paymentType === 'downpayment' ? 500 : totalAmount;
+      amountPaid = payload.paymentType === 'pay-later' ? 0 : totalAmount;
     }
-    
+
     console.log('📝 Creating booking with data:', {
       bookingReference,
       vehicleId: payload.vehicle.id,
@@ -79,7 +79,7 @@ export const createSecureBooking = async (payload: BookingPayload): Promise<Book
       amountPaid,
       paymentType: payload.paymentType
     });
-    
+
     // Upload receipt image first (only for pay-now)
     let receiptUrl: string | null = null;
     if (payload.paymentType === 'pay-now' && payload.receiptImage) {
@@ -89,7 +89,7 @@ export const createSecureBooking = async (payload: BookingPayload): Promise<Book
     } else {
       console.log('ℹ️ Pay later - no receipt to upload');
     }
-    
+
     // Insert customer
     console.log('👤 Creating customer...');
     const { data: customer, error: customerError } = await supabase
@@ -102,19 +102,19 @@ export const createSecureBooking = async (payload: BookingPayload): Promise<Book
       })
       .select()
       .single();
-    
+
     if (customerError) {
       console.error('❌ Customer creation failed:', customerError);
       throw customerError;
     }
     console.log('✅ Customer created:', customer.id);
-    
+
     // Insert booking
     console.log('📅 Creating booking...');
     // For pay-later, status is 'pending' (awaiting admin confirmation)
     // For pay-now, status is 'pending' (awaiting payment verification)
     const bookingStatus = 'pending';
-    
+
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
       .insert({
@@ -135,14 +135,14 @@ export const createSecureBooking = async (payload: BookingPayload): Promise<Book
       })
       .select()
       .single();
-    
+
     if (bookingError) {
       console.error('❌ Booking creation failed:', bookingError);
       console.error('Full error details:', JSON.stringify(bookingError, null, 2));
       throw bookingError;
     }
     console.log('✅ Booking created:', booking.id);
-    
+
     // Insert payment
     // Map frontend payment types to database values
     const dbPaymentType = payload.paymentType === 'pay-now' ? 'full' : 'downpayment';
@@ -159,12 +159,12 @@ export const createSecureBooking = async (payload: BookingPayload): Promise<Book
         payment_proof_url: receiptUrl,
         receipt_url: receiptUrl
       });
-    
+
     if (paymentError) throw paymentError;
-    
+
     // Generate magic link
     const magicLink = `${window.location.origin}/browsevehicles/track/${bookingReference}?t=${magicToken}`;
-    
+
     // Send pending booking email (awaiting admin confirmation)
     console.log('📧 Sending pending booking email via Supabase Edge Function...');
     const emailResult = await sendMagicLinkEmail(
@@ -173,27 +173,27 @@ export const createSecureBooking = async (payload: BookingPayload): Promise<Book
       magicLink,
       {
         vehicleName: payload.vehicle.name,
-        pickupDate: new Date(payload.searchCriteria.pickupDate).toLocaleDateString('en-US', { 
-          month: 'long', 
-          day: 'numeric', 
-          year: 'numeric' 
+        pickupDate: new Date(payload.searchCriteria.pickupDate).toLocaleDateString('en-US', {
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric'
         }),
-        returnDate: new Date(payload.searchCriteria.returnDate).toLocaleDateString('en-US', { 
-          month: 'long', 
-          day: 'numeric', 
-          year: 'numeric' 
+        returnDate: new Date(payload.searchCriteria.returnDate).toLocaleDateString('en-US', {
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric'
         })
       },
       'pending' // Email type: pending admin approval
     );
-    
+
     if (emailResult.success) {
       console.log('✅ Pending booking email sent successfully');
     } else {
       console.warn('⚠️ Failed to send email:', emailResult.error);
       console.log('💡 Booking completed successfully. Customer can use magic link from confirmation page.');
     }
-    
+
     return {
       success: true,
       bookingId: booking.id,
@@ -216,13 +216,13 @@ export const createSecureBooking = async (payload: BookingPayload): Promise<Book
  * Verify magic link token
  */
 export const verifyMagicToken = async (
-  bookingReference: string, 
+  bookingReference: string,
   token: string
 ): Promise<{ valid: boolean; bookingId?: string; error?: string }> => {
   try {
     // Hash the token
     const tokenHash = await hashToken(token);
-    
+
     // Find booking by reference and token hash
     const { data: booking, error } = await supabase
       .from('bookings')
@@ -230,16 +230,16 @@ export const verifyMagicToken = async (
       .eq('booking_reference', bookingReference)
       .eq('magic_token_hash', tokenHash)
       .single();
-    
+
     if (error) {
       return { valid: false, error: 'Invalid or expired link' };
     }
-    
+
     // Check if token is expired
     if (isTokenExpired(booking.token_expires_at)) {
       return { valid: false, error: 'Link has expired' };
     }
-    
+
     return { valid: true, bookingId: booking.id };
   } catch (error) {
     console.error('Failed to verify token:', error);
@@ -262,7 +262,7 @@ export const getBookingByReference = async (bookingReference: string) => {
       `)
       .eq('booking_reference', bookingReference)
       .single();
-    
+
     if (error) throw error;
     return { success: true, booking: data };
   } catch (error) {
@@ -285,7 +285,7 @@ export const getBookingById = async (bookingId: string) => {
       `)
       .eq('id', bookingId)
       .single();
-    
+
     if (error) throw error;
     return { success: true, booking: data };
   } catch (error) {
@@ -299,21 +299,21 @@ export const getBookingById = async (bookingId: string) => {
 const uploadReceipt = async (file: File, bookingReference: string): Promise<string> => {
   const fileExt = file.name.split('.').pop();
   const fileName = `${bookingReference}_${Date.now()}.${fileExt}`;
-  
+
   const { data, error } = await supabase.storage
     .from('receipts')
     .upload(fileName, file, {
       cacheControl: '3600',
       upsert: false
     });
-  
+
   if (error) throw error;
-  
+
   // Get public URL
   const { data: { publicUrl } } = supabase.storage
     .from('receipts')
     .getPublicUrl(data.path);
-  
+
   return publicUrl;
 };
 

@@ -80,7 +80,7 @@ export const CheckoutPage: FC = () => {
   const [isCopied, setIsCopied] = useState(false);
 
   // Payment selection state
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('gcash');
+  const [paymentMethod] = useState<PaymentMethod>('gcash');
   const [paymentType, setPaymentType] = useState<PaymentType>('pay-now');
 
   // Redirect if no checkout data

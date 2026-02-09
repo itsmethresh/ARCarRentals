@@ -303,7 +303,7 @@ export const BookingPage: FC = () => {
         rental_days: rentalDays,
         estimated_price: totalPrice,
         drive_option: driveOption || undefined,
-        last_step: driveOption ? 'renter_info' : 'date_selection',
+        last_step: 'renter_info',
       };
 
       // Debounce the save to avoid too many database calls
@@ -923,8 +923,8 @@ export const BookingPage: FC = () => {
                 onClick={handleProceedToPayment}
                 disabled={!isFormComplete}
                 className={`border-none rounded-full py-3.5 text-base font-medium transition-all ${isFormComplete
-                    ? 'bg-[#E22B2B] hover:bg-[#c92525] cursor-pointer'
-                    : 'bg-neutral-300 cursor-not-allowed'
+                  ? 'bg-[#E22B2B] hover:bg-[#c92525] cursor-pointer'
+                  : 'bg-neutral-300 cursor-not-allowed'
                   }`}
               >
                 Proceed to Payment

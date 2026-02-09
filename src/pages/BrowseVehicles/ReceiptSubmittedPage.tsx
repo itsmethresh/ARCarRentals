@@ -671,7 +671,7 @@ export const ReceiptSubmittedPage: React.FC = () => {
                   <span className="text-neutral-600 font-bold">Amount Paid</span>
                   <span className="font-bold text-green-600">₱{amountPaid.toLocaleString()}.00</span>
                 </div>
-                {paymentType === 'downpayment' && (
+                {paymentType === 'pay-later' && remainingBalance > 0 && (
                   <>
                     <div className="flex justify-between text-sm items-center border-t border-neutral-200 pt-2">
                       <span className="text-neutral-600 font-bold">Remaining Balance</span>
