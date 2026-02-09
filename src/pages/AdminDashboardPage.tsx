@@ -170,7 +170,7 @@ export const AdminDashboardPage: FC = () => {
           .gte('payments.paid_at', firstDayOfMonth)
           .lte('payments.paid_at', lastDayOfMonth)
           .in('payments.payment_status', ['paid', 'completed']);
-        
+
         const totalRevenue = revenueData?.reduce((sum, b) => sum + (b.total_amount || 0), 0) || 0;
 
         // 5. Fetch bookings over time (last 6 months)
@@ -215,8 +215,8 @@ export const AdminDashboardPage: FC = () => {
             customer: booking.customers?.full_name || 'Unknown Customer',
             vehicle: booking.vehicles ? `${booking.vehicles.brand} ${booking.vehicles.model}` : 'Unknown Vehicle',
             date: new Date(booking.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-            status: booking.booking_status === 'confirmed' || booking.booking_status === 'pending' ? 'active' : 
-                   booking.booking_status === 'completed' ? 'completed' : 'cancelled',
+            status: booking.booking_status === 'confirmed' || booking.booking_status === 'pending' ? 'active' :
+              booking.booking_status === 'completed' ? 'completed' : 'cancelled',
           }));
           setRecentBookings(transformed);
         }
@@ -272,19 +272,20 @@ export const AdminDashboardPage: FC = () => {
   return (
     <>
       <div className="dashboard-container">
-        {/* Admin User Info - Above Title */}
-        <div className="user-info-section">
-          <div className="user-details">
-            <div className="user-name">Admin User</div>
-            <div className="user-role">Administrator</div>
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-neutral-900">Dashboard</h1>
+            <p className="text-sm sm:text-base text-neutral-500 mt-1">Overview of your car rental business performance.</p>
           </div>
-          <div className="user-avatar">
-            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" alt="Admin" />
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-white border border-neutral-200 rounded-lg text-xs sm:text-sm font-medium text-neutral-700 hover:bg-neutral-50">
+              <Calendar className="w-4 h-4" />
+              <span className="hidden sm:inline">This Month</span>
+              <span className="sm:hidden">Filter</span>
+            </button>
           </div>
         </div>
-
-        {/* Page Title */}
-        <h1 className="page-title">Dashboard</h1>
 
         {/* KPI Cards Row */}
         <div className="kpi-grid">
@@ -334,28 +335,28 @@ export const AdminDashboardPage: FC = () => {
                 <ResponsiveContainer width="100%" height={280}>
                   <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis 
-                      dataKey="month" 
+                    <XAxis
+                      dataKey="month"
                       tick={{ fill: '#9ca3af', fontSize: 13 }}
                       axisLine={{ stroke: '#e5e7eb' }}
                     />
-                    <YAxis 
+                    <YAxis
                       tick={{ fill: '#9ca3af', fontSize: 13 }}
                       axisLine={{ stroke: '#e5e7eb' }}
                     />
-                    <Tooltip 
-                      contentStyle={{ 
-                        background: 'white', 
+                    <Tooltip
+                      contentStyle={{
+                        background: 'white',
                         border: '1px solid #e5e7eb',
                         borderRadius: '8px',
                         padding: '8px 12px'
                       }}
                       labelStyle={{ color: '#1a1a1a', fontWeight: 600 }}
                     />
-                    <Line 
-                      type="monotone" 
-                      dataKey="bookings" 
-                      stroke="#ea580c" 
+                    <Line
+                      type="monotone"
+                      dataKey="bookings"
+                      stroke="#ea580c"
                       strokeWidth={3}
                       dot={{ fill: '#ea580c', r: 5 }}
                       activeDot={{ r: 7 }}

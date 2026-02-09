@@ -1,10 +1,11 @@
-import { type FC, useState, useEffect } from 'react';
+import { type FC, useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { User, Check, ChevronRight, AlertCircle, ArrowLeft, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui';
 import type { Car } from '@/types';
 import { updateRenterInfo, updateSearchCriteria, updateDriveOption, agreeToTerms } from '@/utils/sessionManager';
 import { CarRentalAgreementModal } from './CarRentalAgreementModal';
+import { debouncedSaveLead, cancelPendingSave, type LeadData } from '@/services/leadsService';
 
 interface BookingState {
   vehicle: Car;
@@ -258,6 +259,61 @@ export const BookingPage: FC = () => {
       setPhoneNumber(phoneNumber.slice(0, country.maxLength));
     }
   };
+
+  // Track if lead has been saved to avoid duplicate saves
+  const leadSavedRef = useRef(false);
+
+  // Check if form is complete (all required fields filled)
+  const isFormComplete =
+    fullName.trim() !== '' &&
+    email.trim() !== '' &&
+    isValidEmail(email.trim()) &&
+    phoneNumber.trim() !== '' &&
+    isValidPhoneNumber(phoneNumber) &&
+    pickupLocation !== '' &&
+    dropoffLocation !== '' &&
+    pickupDate !== '' &&
+    returnDate !== '' &&
+    driveOption !== '';
+
+  // Auto-save lead when contact info is filled
+  useEffect(() => {
+    // Only save if all contact fields are filled and valid
+    if (
+      fullName.trim() &&
+      email.trim() &&
+      isValidEmail(email.trim()) &&
+      phoneNumber.trim() &&
+      isValidPhoneNumber(phoneNumber)
+    ) {
+      console.log('📋 Contact info complete, saving lead...');
+
+      const leadData: LeadData = {
+        lead_name: fullName.trim(),
+        email: email.trim().toLowerCase(),
+        phone: `${selectedCountryCode.code}${phoneNumber}`,
+        vehicle_id: vehicle.id,
+        pickup_location: pickupLocation || undefined,
+        dropoff_location: dropoffLocation || undefined,
+        pickup_date: pickupDate || undefined,
+        pickup_time: pickupTime || undefined,
+        return_date: returnDate || undefined,
+        rental_days: rentalDays,
+        estimated_price: totalPrice,
+        drive_option: driveOption || undefined,
+        last_step: driveOption ? 'renter_info' : 'date_selection',
+      };
+
+      // Debounce the save to avoid too many database calls
+      debouncedSaveLead(leadData, 2000);
+      leadSavedRef.current = true;
+    }
+
+    // Cleanup: cancel pending save on unmount
+    return () => {
+      cancelPendingSave();
+    };
+  }, [fullName, email, phoneNumber, selectedCountryCode, pickupLocation, dropoffLocation, pickupDate, pickupTime, returnDate, driveOption, vehicle.id, rentalDays, totalPrice]);
 
   // Handle form submission - Show agreement first
   const handleProceedToPayment = async () => {
@@ -856,7 +912,11 @@ export const BookingPage: FC = () => {
                 variant="primary"
                 fullWidth
                 onClick={handleProceedToPayment}
-                className="bg-[#E22B2B] hover:bg-[#c92525] border-none rounded-full py-3.5 text-base font-medium"
+                disabled={!isFormComplete}
+                className={`border-none rounded-full py-3.5 text-base font-medium transition-all ${isFormComplete
+                    ? 'bg-[#E22B2B] hover:bg-[#c92525] cursor-pointer'
+                    : 'bg-neutral-300 cursor-not-allowed'
+                  }`}
               >
                 Proceed to Payment
                 <ChevronRight className="w-5 h-5 ml-1" />

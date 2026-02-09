@@ -111,10 +111,10 @@ export const AdminFleetPage: FC = () => {
 
   const handleDeleteConfirm = async () => {
     if (!selectedVehicle) return;
-    
+
     setIsDeleting(true);
     setDeleteError(null); // Clear any previous errors
-    
+
     try {
       const { success, error } = await vehicleService.delete(selectedVehicle.id);
 
@@ -122,7 +122,7 @@ export const AdminFleetPage: FC = () => {
         setDeleteError(error || 'Failed to delete vehicle');
         return;
       }
-      
+
       // Success - close modal and refresh
       setIsDeleteDialogOpen(false);
       setSelectedVehicle(null);
@@ -143,268 +143,270 @@ export const AdminFleetPage: FC = () => {
   return (
     <>
       <div className="fleet-container">
-        {/* Admin User Info - Above Title */}
-        <div className="user-info-section">
-          <div className="user-details">
-            <div className="user-name">Admin User</div>
-            <div className="user-role">Administrator</div>
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-neutral-900">Fleet Management</h1>
+            <p className="text-sm sm:text-base text-neutral-500 mt-1">Manage your vehicle inventory and availability.</p>
           </div>
-          <div className="user-avatar">
-            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" alt="Admin" />
-          </div>
-        </div>
-
-        {/* Page Title */}
-        <h1 className="page-title">Fleet Management</h1>
-
-      {/* Stats */}
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-neutral-100 flex items-center justify-center">
-              <Car className="h-5 w-5 text-neutral-600" />
-            </div>
-            <div>
-              {isLoading ? (
-                <div className="h-8 w-12 bg-neutral-200 animate-pulse rounded" />
-              ) : (
-                <p className="text-2xl font-bold text-neutral-900">{stats?.total || 0}</p>
-              )}
-              <p className="stat-label">Total Vehicles</p>
-            </div>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-              <Car className="h-5 w-5 text-green-600" />
-            </div>
-            <div>
-              {isLoading ? (
-                <div className="h-8 w-12 bg-neutral-200 animate-pulse rounded" />
-              ) : (
-                <p className="text-2xl font-bold text-green-600">{stats?.available || 0}</p>
-              )}
-              <p className="stat-label">Available</p>
-            </div>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-              <Car className="h-5 w-5 text-blue-600" />
-            </div>
-            <div>
-              {isLoading ? (
-                <div className="h-8 w-12 bg-neutral-200 animate-pulse rounded" />
-              ) : (
-                <p className="text-2xl font-bold text-blue-600">{stats?.rented || 0}</p>
-              )}
-              <p className="stat-label">Rented</p>
-            </div>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center">
-              <Settings2 className="h-5 w-5 text-yellow-600" />
-            </div>
-            <div>
-              {isLoading ? (
-                <div className="h-8 w-12 bg-neutral-200 animate-pulse rounded" />
-              ) : (
-                <p className="text-2xl font-bold text-yellow-600">{stats?.maintenance || 0}</p>
-              )}
-              <p className="stat-label">Maintenance</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Search and Filter */}
-      <div className="search-card">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1">
-            <Input
-              placeholder="Search vehicles..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              leftIcon={<Search className="h-5 w-5 text-neutral-400" />}
-            />
-          </div>
-          <div className="flex gap-2">
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="px-4 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
-              <option value="all">All Status</option>
-              <option value="available">Available</option>
-              <option value="rented">Rented</option>
-              <option value="maintenance">Maintenance</option>
-            </select>
-            <Button variant="outline" className="gap-2">
-              <Filter className="h-4 w-4" />
-              Filters
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Vehicle Grid */}
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-        </div>
-      ) : vehicles.length === 0 ? (
-        <Card className="p-12">
-          <div className="text-center">
-            <Car className="h-16 w-16 text-neutral-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-neutral-900 mb-2">No vehicles found</h3>
-            <p className="text-neutral-500 mb-6">
-              {searchQuery || filterStatus !== 'all'
-                ? 'Try adjusting your search or filters'
-                : 'Get started by adding your first vehicle to the fleet'}
-            </p>
-            <Button className="bg-primary-600 hover:bg-primary-700" onClick={() => setIsAddModalOpen(true)}>
-              <Plus className="h-5 w-5 mr-2" />
-              Add Your First Vehicle
-            </Button>
-          </div>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-          {vehicles.map((vehicle) => (
-          <div
-            key={vehicle.id}
-            className="bg-white rounded-[16px] border border-[#ededf2] shadow-sm hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full"
-            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-[#E22B2B] text-white rounded-lg text-xs sm:text-sm font-medium hover:bg-[#c71f1f]"
           >
-            {/* Header: Name + Category Badge */}
-            <div className="px-5 pt-4 pb-2">
-              <div className="flex items-start justify-between gap-2">
-                <h3 className="font-bold text-lg text-[#1f1f1f] leading-tight">
-                  {vehicle.brand} {vehicle.model}
-                </h3>
-                <span className="px-2.5 py-1 text-xs font-semibold text-white bg-[#e53935] rounded-full flex-shrink-0 whitespace-nowrap">
-                  {vehicle.vehicle_categories?.name || 'Uncategorized'}
-                </span>
-              </div>
-            </div>
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">Add Vehicle</span>
+            <span className="sm:hidden">Add</span>
+          </button>
+        </div>
 
-            {/* Car Image with Status Badge Inside */}
-            <div className="px-5 py-2">
-              <div className="bg-[#fafafa] rounded-xl overflow-hidden relative" style={{ height: '160px' }}>
-                {/* Status Badge - Inside Image */}
-                <div className="absolute top-2.5 left-2.5 z-10">
-                  <StatusBadge status={vehicle.status} />
-                </div>
-                <img
-                  src={vehicle.image_url || 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400&q=80'}
-                  alt={`${vehicle.brand} ${vehicle.model}`}
-                  className="w-full h-full object-cover"
-                />
+        {/* Stats */}
+        <div className="stats-grid">
+          <div className="stat-card">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-neutral-100 flex items-center justify-center">
+                <Car className="h-5 w-5 text-neutral-600" />
               </div>
-            </div>
-
-            {/* Specs Row */}
-            <div className="px-5 py-4">
-              <div className="flex items-center justify-around text-[#6b7280]">
-                <div className="flex flex-col items-center gap-1.5">
-                  <Settings2 className="h-4 w-4" strokeWidth={2} />
-                  <span className="text-xs capitalize font-medium">{vehicle.transmission}</span>
-                </div>
-                <div className="h-8 w-px bg-[#eaeaf0]"></div>
-                <div className="flex flex-col items-center gap-1.5">
-                  <Users className="h-4 w-4" strokeWidth={2} />
-                  <span className="text-xs font-medium">{vehicle.seats} Seats</span>
-                </div>
-                <div className="h-8 w-px bg-[#eaeaf0]"></div>
-                <div className="flex flex-col items-center gap-1.5">
-                  <Fuel className="h-4 w-4" strokeWidth={2} />
-                  <span className="text-xs capitalize font-medium">{vehicle.fuel_type}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div className="mx-5 border-t border-[#eaeaf0]" />
-
-            {/* Price & Admin Actions - Push to bottom */}
-            <div className="px-5 py-4 flex items-center justify-between mt-auto gap-3">
-              <div className="flex flex-col flex-shrink-0">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-bold text-[#e53935] leading-none">
-                    ₱{vehicle.price_per_day.toLocaleString()}
-                  </span>
-                </div>
-                <span className="text-[#6b7280] text-xs font-medium">/day</span>
-              </div>
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => handleEdit(vehicle)}
-                  className="p-2.5 hover:bg-blue-50 rounded-lg transition-colors text-blue-600 border border-blue-200"
-                  title="Edit vehicle"
-                >
-                  <Edit className="h-4 w-4" />
-                </button>
-                <button 
-                  onClick={() => handleDeleteClick(vehicle)}
-                  className="p-2.5 hover:bg-red-50 rounded-lg transition-colors text-red-600 border border-red-200"
-                  title="Delete vehicle"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
+              <div>
+                {isLoading ? (
+                  <div className="h-8 w-12 bg-neutral-200 animate-pulse rounded" />
+                ) : (
+                  <p className="text-2xl font-bold text-neutral-900">{stats?.total || 0}</p>
+                )}
+                <p className="stat-label">Total Vehicles</p>
               </div>
             </div>
           </div>
-        ))}
+          <div className="stat-card">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+                <Car className="h-5 w-5 text-green-600" />
+              </div>
+              <div>
+                {isLoading ? (
+                  <div className="h-8 w-12 bg-neutral-200 animate-pulse rounded" />
+                ) : (
+                  <p className="text-2xl font-bold text-green-600">{stats?.available || 0}</p>
+                )}
+                <p className="stat-label">Available</p>
+              </div>
+            </div>
+          </div>
+          <div className="stat-card">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                <Car className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                {isLoading ? (
+                  <div className="h-8 w-12 bg-neutral-200 animate-pulse rounded" />
+                ) : (
+                  <p className="text-2xl font-bold text-blue-600">{stats?.rented || 0}</p>
+                )}
+                <p className="stat-label">Rented</p>
+              </div>
+            </div>
+          </div>
+          <div className="stat-card">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center">
+                <Settings2 className="h-5 w-5 text-yellow-600" />
+              </div>
+              <div>
+                {isLoading ? (
+                  <div className="h-8 w-12 bg-neutral-200 animate-pulse rounded" />
+                ) : (
+                  <p className="text-2xl font-bold text-yellow-600">{stats?.maintenance || 0}</p>
+                )}
+                <p className="stat-label">Maintenance</p>
+              </div>
+            </div>
+          </div>
         </div>
-      )}
 
-      {/* Add Vehicle Modal */}
-      <AddVehicleModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onSuccess={fetchVehicles}
-      />
+        {/* Search and Filter */}
+        <div className="search-card">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <Input
+                placeholder="Search vehicles..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                leftIcon={<Search className="h-5 w-5 text-neutral-400" />}
+              />
+            </div>
+            <div className="flex gap-2">
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="px-4 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="all">All Status</option>
+                <option value="available">Available</option>
+                <option value="rented">Rented</option>
+                <option value="maintenance">Maintenance</option>
+              </select>
+              <Button variant="outline" className="gap-2">
+                <Filter className="h-4 w-4" />
+                Filters
+              </Button>
+            </div>
+          </div>
+        </div>
 
-      {/* Edit Vehicle Modal */}
-      <EditVehicleModal
-        isOpen={isEditModalOpen}
-        onClose={() => {
-          setIsEditModalOpen(false);
-          setSelectedVehicle(null);
-        }}
-        onSuccess={fetchVehicles}
-        vehicle={selectedVehicle}
-      />
+        {/* Vehicle Grid */}
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+          </div>
+        ) : vehicles.length === 0 ? (
+          <Card className="p-12">
+            <div className="text-center">
+              <Car className="h-16 w-16 text-neutral-300 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-neutral-900 mb-2">No vehicles found</h3>
+              <p className="text-neutral-500 mb-6">
+                {searchQuery || filterStatus !== 'all'
+                  ? 'Try adjusting your search or filters'
+                  : 'Get started by adding your first vehicle to the fleet'}
+              </p>
+              <Button className="bg-primary-600 hover:bg-primary-700" onClick={() => setIsAddModalOpen(true)}>
+                <Plus className="h-5 w-5 mr-2" />
+                Add Your First Vehicle
+              </Button>
+            </div>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+            {vehicles.map((vehicle) => (
+              <div
+                key={vehicle.id}
+                className="bg-white rounded-[16px] border border-[#ededf2] shadow-sm hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full"
+                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+              >
+                {/* Header: Name + Category Badge */}
+                <div className="px-5 pt-4 pb-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-bold text-lg text-[#1f1f1f] leading-tight">
+                      {vehicle.brand} {vehicle.model}
+                    </h3>
+                    <span className="px-2.5 py-1 text-xs font-semibold text-white bg-[#e53935] rounded-full flex-shrink-0 whitespace-nowrap">
+                      {vehicle.vehicle_categories?.name || 'Uncategorized'}
+                    </span>
+                  </div>
+                </div>
 
-      {/* Delete Confirmation Dialog */}
-      <ConfirmDialog
-        isOpen={isDeleteDialogOpen}
-        onClose={() => {
-          setIsDeleteDialogOpen(false);
-          setSelectedVehicle(null);
-          setDeleteError(null);
-        }}
-        onConfirm={handleDeleteConfirm}
-        title="Delete Vehicle"
-        message={`Are you sure you want to delete ${selectedVehicle?.brand} ${selectedVehicle?.model}? This action cannot be undone.`}
-        confirmText="Delete"
-        variant="danger"
-        isLoading={isDeleting}
-        errorMessage={deleteError}
-      />
+                {/* Car Image with Status Badge Inside */}
+                <div className="px-5 py-2">
+                  <div className="bg-[#fafafa] rounded-xl overflow-hidden relative" style={{ height: '160px' }}>
+                    {/* Status Badge - Inside Image */}
+                    <div className="absolute top-2.5 left-2.5 z-10">
+                      <StatusBadge status={vehicle.status} />
+                    </div>
+                    <img
+                      src={vehicle.image_url || 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400&q=80'}
+                      alt={`${vehicle.brand} ${vehicle.model}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
 
-      {/* Floating Add Button for Mobile */}
-      <button
-        className="fleet-floating-add"
-        onClick={() => setIsAddModalOpen(true)}
-        title="Add Vehicle"
-      >
-        <Plus className="h-6 w-6" />
-      </button>
+                {/* Specs Row */}
+                <div className="px-5 py-4">
+                  <div className="flex items-center justify-around text-[#6b7280]">
+                    <div className="flex flex-col items-center gap-1.5">
+                      <Settings2 className="h-4 w-4" strokeWidth={2} />
+                      <span className="text-xs capitalize font-medium">{vehicle.transmission}</span>
+                    </div>
+                    <div className="h-8 w-px bg-[#eaeaf0]"></div>
+                    <div className="flex flex-col items-center gap-1.5">
+                      <Users className="h-4 w-4" strokeWidth={2} />
+                      <span className="text-xs font-medium">{vehicle.seats} Seats</span>
+                    </div>
+                    <div className="h-8 w-px bg-[#eaeaf0]"></div>
+                    <div className="flex flex-col items-center gap-1.5">
+                      <Fuel className="h-4 w-4" strokeWidth={2} />
+                      <span className="text-xs capitalize font-medium">{vehicle.fuel_type}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className="mx-5 border-t border-[#eaeaf0]" />
+
+                {/* Price & Admin Actions - Push to bottom */}
+                <div className="px-5 py-4 flex items-center justify-between mt-auto gap-3">
+                  <div className="flex flex-col flex-shrink-0">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-2xl font-bold text-[#e53935] leading-none">
+                        ₱{vehicle.price_per_day.toLocaleString()}
+                      </span>
+                    </div>
+                    <span className="text-[#6b7280] text-xs font-medium">/day</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEdit(vehicle)}
+                      className="p-2.5 hover:bg-blue-50 rounded-lg transition-colors text-blue-600 border border-blue-200"
+                      title="Edit vehicle"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteClick(vehicle)}
+                      className="p-2.5 hover:bg-red-50 rounded-lg transition-colors text-red-600 border border-red-200"
+                      title="Delete vehicle"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Add Vehicle Modal */}
+        <AddVehicleModal
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          onSuccess={fetchVehicles}
+        />
+
+        {/* Edit Vehicle Modal */}
+        <EditVehicleModal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setSelectedVehicle(null);
+          }}
+          onSuccess={fetchVehicles}
+          vehicle={selectedVehicle}
+        />
+
+        {/* Delete Confirmation Dialog */}
+        <ConfirmDialog
+          isOpen={isDeleteDialogOpen}
+          onClose={() => {
+            setIsDeleteDialogOpen(false);
+            setSelectedVehicle(null);
+            setDeleteError(null);
+          }}
+          onConfirm={handleDeleteConfirm}
+          title="Delete Vehicle"
+          message={`Are you sure you want to delete ${selectedVehicle?.brand} ${selectedVehicle?.model}? This action cannot be undone.`}
+          confirmText="Delete"
+          variant="danger"
+          isLoading={isDeleting}
+          errorMessage={deleteError}
+        />
+
+        {/* Floating Add Button for Mobile */}
+        <button
+          className="fleet-floating-add"
+          onClick={() => setIsAddModalOpen(true)}
+          title="Add Vehicle"
+        >
+          <Plus className="h-6 w-6" />
+        </button>
       </div>
 
       <style>{`

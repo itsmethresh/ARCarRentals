@@ -10,7 +10,7 @@ import {
   SlidersHorizontal,
   Car,
 } from 'lucide-react';
-import { Button, Input, ConfirmDialog } from '@components/ui';
+import { Button, ConfirmDialog } from '@components/ui';
 import { supabase } from '@services/supabase';
 import { AdminPageSkeleton } from '@components/ui/AdminPageSkeleton';
 import { BookingDetailsViewModal } from '@components/ui/BookingDetailsViewModal';
@@ -162,9 +162,8 @@ const BookingListCard: FC<BookingListCardProps> = ({ booking, onClick, onDelete 
             {isActive ? 'ACTIVE' : booking.booking_status === 'confirmed' ? 'ACCEPTED' : booking.booking_status === 'refund_pending' ? 'REFUND PENDING' : booking.booking_status.toUpperCase()}
           </div>
           {latestPayment && (
-            <div className={`mt-2 text-xs font-medium px-2 py-1 rounded-full inline-block ${
-              latestPayment.payment_status === 'completed' || latestPayment.payment_status === 'paid' ? 'bg-green-100 text-green-800' : latestPayment.payment_status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-neutral-100 text-neutral-800'
-            }`}>
+            <div className={`mt-2 text-xs font-medium px-2 py-1 rounded-full inline-block ${latestPayment.payment_status === 'completed' || latestPayment.payment_status === 'paid' ? 'bg-green-100 text-green-800' : latestPayment.payment_status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-neutral-100 text-neutral-800'
+              }`}>
               Payment: {latestPayment.payment_status.charAt(0).toUpperCase() + latestPayment.payment_status.slice(1)}
             </div>
           )}
@@ -237,9 +236,8 @@ const BookingListCard: FC<BookingListCardProps> = ({ booking, onClick, onDelete 
           <div>
             <div className="text-xl font-bold text-neutral-900">₱{booking.total_amount.toLocaleString()}</div>
             {latestPayment && (
-              <div className={`mt-1 text-xs font-medium px-2 py-0.5 rounded-full inline-block ${
-                latestPayment.payment_status === 'completed' || latestPayment.payment_status === 'paid' ? 'bg-green-100 text-green-800' : latestPayment.payment_status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-neutral-100 text-neutral-800'
-              }`}>
+              <div className={`mt-1 text-xs font-medium px-2 py-0.5 rounded-full inline-block ${latestPayment.payment_status === 'completed' || latestPayment.payment_status === 'paid' ? 'bg-green-100 text-green-800' : latestPayment.payment_status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-neutral-100 text-neutral-800'
+                }`}>
                 Payment: {latestPayment.payment_status.charAt(0).toUpperCase() + latestPayment.payment_status.slice(1)}
               </div>
             )}
@@ -329,7 +327,7 @@ export const AdminBookingsPage: FC = () => {
     // Real-time subscription
     const subscription = supabase
       .channel('bookings-changes')
-      .on('postgres_changes', 
+      .on('postgres_changes',
         { event: '*', schema: 'public', table: 'bookings' },
         () => fetchBookings()
       )
@@ -374,12 +372,12 @@ export const AdminBookingsPage: FC = () => {
     try {
       // Prepare CSV data with proper column widths
       const headers = ['Booking ID', 'Customer Name', 'Contact Number', 'Vehicle', 'Pickup Date', 'Return Date', 'Duration', 'Total Amount (PHP)', 'Status'];
-      
+
       const csvRows = filteredBookings.map(booking => {
         const startDate = new Date(booking.start_date);
         const endDate = new Date(booking.start_date);
         endDate.setDate(endDate.getDate() + booking.rental_days);
-        
+
         // Format dates as readable format with proper spacing
         const formatDate = (date: Date) => {
           const year = date.getFullYear();
@@ -387,7 +385,7 @@ export const AdminBookingsPage: FC = () => {
           const day = String(date.getDate()).padStart(2, '0');
           return `${year}-${month}-${day}`;
         };
-        
+
         return [
           (booking.booking_reference || '').padEnd(15),
           (booking.customers?.full_name || 'N/A').padEnd(25),
@@ -400,24 +398,24 @@ export const AdminBookingsPage: FC = () => {
           booking.booking_status.toUpperCase().padEnd(12)
         ].map(field => `"${field.trim()}"`).join(',');
       });
-      
+
       const csvContent = [headers.join(','), ...csvRows].join('\n');
-      
+
       // Create and download file with UTF-8 BOM for proper encoding
       const BOM = '\uFEFF';
       const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
-      
+
       const fileName = `bookings_export_${new Date().toISOString().split('T')[0]}.csv`;
       link.setAttribute('href', url);
       link.setAttribute('download', fileName);
       link.style.visibility = 'hidden';
-      
+
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       // Show success message
       showSuccessToast(`Successfully exported ${filteredBookings.length} booking${filteredBookings.length !== 1 ? 's' : ''} to ${fileName}`);
     } catch (error) {
@@ -453,9 +451,9 @@ export const AdminBookingsPage: FC = () => {
         <span style="font-size: clamp(13px, 1vw, 14px); font-weight: 500;">${message}</span>
       </div>
     `;
-    
+
     document.body.appendChild(toast);
-    
+
     // Remove after 3 seconds
     setTimeout(() => {
       toast.style.animation = 'slideOut 0.3s ease-out';
@@ -505,47 +503,38 @@ export const AdminBookingsPage: FC = () => {
   return (
     <>
       <div className="bookings-container">
-        {/* Admin User Info - Above Title */}
-        <div className="user-info-top">
-          <div className="user-details">
-            <div className="user-name">Admin User</div>
-            <div className="user-role">ADMINISTRATOR</div>
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-neutral-900">Bookings Management</h1>
+            <p className="text-sm sm:text-base text-neutral-500 mt-1">Track and manage all car rental reservations.</p>
           </div>
-          <div className="user-avatar">
-            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" alt="Admin" />
-          </div>
-        </div>
-
-        {/* Page Header with Search and Actions */}
-        <div className="page-header-row">
-          <h1 className="page-title">Bookings Management</h1>
-          <div className="search-section">
-            <Input
-              placeholder="Search by booking #, customer, or car..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              leftIcon={<Search className="h-4 w-4 text-neutral-400" />}
-            />
-          </div>
-          <div className="header-actions-group">
-            <div className="action-buttons">
-              <Button 
-                variant="outline" 
-                className="refresh-button"
-                onClick={fetchBookings}
-                disabled={isLoading}
-              >
-                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-                Refresh
-              </Button>
-              <Button 
-                className="export-button"
-                onClick={handleExportBookings}
-              >
-                <Download className="h-4 w-4" />
-                Export
-              </Button>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="relative flex-1 sm:flex-none">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+              <input
+                type="text"
+                placeholder="Search bookings..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full sm:w-64 pl-10 pr-4 py-2 sm:py-2.5 border border-neutral-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#E22B2B]/20 focus:border-[#E22B2B]"
+              />
             </div>
+            <button
+              onClick={fetchBookings}
+              disabled={isLoading}
+              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-white border border-neutral-200 rounded-lg text-xs sm:text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">Refresh</span>
+            </button>
+            <button
+              onClick={handleExportBookings}
+              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-[#E22B2B] text-white rounded-lg text-xs sm:text-sm font-medium hover:bg-[#c71f1f]"
+            >
+              <Download className="w-4 h-4" />
+              <span className="hidden sm:inline">Export</span>
+            </button>
           </div>
         </div>
 

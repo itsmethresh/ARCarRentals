@@ -1,7 +1,6 @@
 import { type FC, useState, useEffect } from 'react';
 import {
     Search,
-    Calendar,
     ChevronDown,
     Download,
     Phone,
@@ -378,132 +377,131 @@ export const AdminLeadsPage: FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#FAFAFA] p-4 sm:p-6 lg:p-8" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-            {/* Header Section */}
-            <div className="mb-6 sm:mb-8">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-6">
-                    {/* Title and Description */}
-                    <div>
-                        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-neutral-900">Leads Management</h1>
-                        <p className="text-sm sm:text-base text-neutral-500 mt-1">Track and recover abandoned bookings.</p>
-                    </div>
-
-                    {/* Analytics Cards - Horizontal scroll on mobile */}
-                    <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:overflow-visible">
-                        {/* Total Abandoned */}
-                        <div className="bg-white rounded-xl border border-neutral-200 px-4 sm:px-5 py-3 sm:py-4 min-w-[150px] sm:min-w-[180px] flex-shrink-0">
-                            <div className="flex items-center justify-between mb-1">
-                                <span className="text-[10px] sm:text-xs font-medium text-neutral-500 uppercase tracking-wide">Total Abandoned</span>
-                                <span className="flex items-center gap-1 text-[10px] sm:text-xs font-medium text-red-500">
-                                    <TrendingUp className="w-3 h-3" />
-                                    12%
-                                </span>
-                            </div>
-                            <div className="flex items-baseline gap-2">
-                                <span className="text-2xl sm:text-3xl font-bold text-neutral-900">{totalAbandoned}</span>
-                                <span className="text-xs sm:text-sm text-neutral-400">last 7 days</span>
-                            </div>
-                        </div>
-
-                        {/* Recovered Bookings */}
-                        <div className="bg-white rounded-xl border border-neutral-200 px-4 sm:px-5 py-3 sm:py-4 min-w-[150px] sm:min-w-[180px] flex-shrink-0">
-                            <div className="flex items-center justify-between mb-1">
-                                <span className="text-[10px] sm:text-xs font-medium text-neutral-500 uppercase tracking-wide">Recovered</span>
-                                <span className="flex items-center gap-1 text-[10px] sm:text-xs font-medium text-green-500">
-                                    <TrendingUp className="w-3 h-3" />
-                                    5%
-                                </span>
-                            </div>
-                            <div className="flex items-baseline gap-2">
-                                <span className="text-2xl sm:text-3xl font-bold text-neutral-900">{recoveredCount}</span>
-                                <span className="text-xs sm:text-sm text-neutral-400">converted</span>
-                            </div>
-                        </div>
-
-                        {/* Conversion Rate */}
-                        <div className="bg-white rounded-xl border border-neutral-200 px-4 sm:px-5 py-3 sm:py-4 min-w-[150px] sm:min-w-[180px] flex-shrink-0">
-                            <div className="flex items-center justify-between mb-1">
-                                <span className="text-[10px] sm:text-xs font-medium text-neutral-500 uppercase tracking-wide">Conversion Rate</span>
-                                <Target className="w-3 sm:w-4 h-3 sm:h-4 text-neutral-400" />
-                            </div>
-                            <div className="flex items-baseline gap-2">
-                                <span className="text-2xl sm:text-3xl font-bold text-[#E22B2B]">{conversionRate}%</span>
-                            </div>
-                        </div>
-                    </div>
+        <div className="space-y-6" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-neutral-900">Leads Management</h1>
+                    <p className="text-sm sm:text-base text-neutral-500 mt-1">Track and recover abandoned bookings.</p>
+                </div>
+                <div className="flex items-center gap-2 sm:gap-3">
+                    <button className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-white border border-neutral-200 rounded-lg text-xs sm:text-sm font-medium text-neutral-700 hover:bg-neutral-50">
+                        <Download className="w-4 h-4" />
+                        <span className="hidden sm:inline">Export</span>
+                    </button>
                 </div>
             </div>
 
-            {/* Filters Bar */}
-            <div className="bg-white rounded-xl border border-neutral-200 p-4 mb-6">
-                <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
-                    {/* Search */}
-                    <div className="relative flex-1 max-w-md">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
-                        <input
-                            type="text"
-                            placeholder="Search leads..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2.5 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#E22B2B]/20 focus:border-[#E22B2B]"
-                        />
+            {/* Stats Cards */}
+            <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:overflow-visible">
+                {/* Total Abandoned */}
+                <div className="bg-white rounded-xl border border-neutral-200 p-4 sm:p-5 min-w-[160px] sm:min-w-0 sm:flex-1 flex-shrink-0">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-8 sm:w-10 h-8 sm:h-10 rounded-lg bg-red-50 flex items-center justify-center">
+                            <TrendingUp className="w-4 sm:w-5 h-4 sm:h-5 text-red-600" />
+                        </div>
+                        <span className="text-xs sm:text-sm text-neutral-500">Total Abandoned</span>
+                    </div>
+                    <p className="text-lg sm:text-2xl font-bold text-neutral-900">{totalAbandoned}</p>
+                    <p className="text-xs text-neutral-400 mt-1">last 7 days</p>
+                </div>
+
+                {/* Recovered */}
+                <div className="bg-white rounded-xl border border-neutral-200 p-4 sm:p-5 min-w-[160px] sm:min-w-0 sm:flex-1 flex-shrink-0">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-8 sm:w-10 h-8 sm:h-10 rounded-lg bg-green-50 flex items-center justify-center">
+                            <CheckCircle className="w-4 sm:w-5 h-4 sm:h-5 text-green-600" />
+                        </div>
+                        <span className="text-xs sm:text-sm text-neutral-500">Recovered</span>
+                    </div>
+                    <p className="text-lg sm:text-2xl font-bold text-neutral-900">{recoveredCount}</p>
+                    <p className="text-xs text-neutral-400 mt-1">converted leads</p>
+                </div>
+
+                {/* Pending */}
+                <div className="bg-white rounded-xl border border-neutral-200 p-4 sm:p-5 min-w-[160px] sm:min-w-0 sm:flex-1 flex-shrink-0">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-8 sm:w-10 h-8 sm:h-10 rounded-lg bg-yellow-50 flex items-center justify-center">
+                            <Clock className="w-4 sm:w-5 h-4 sm:h-5 text-yellow-600" />
+                        </div>
+                        <span className="text-xs sm:text-sm text-neutral-500">Pending</span>
+                    </div>
+                    <p className="text-lg sm:text-2xl font-bold text-neutral-900">{leads.filter(l => l.status === 'pending').length}</p>
+                    <p className="text-xs text-neutral-400 mt-1">awaiting action</p>
+                </div>
+
+                {/* Conversion Rate */}
+                <div className="bg-white rounded-xl border border-neutral-200 p-4 sm:p-5 min-w-[160px] sm:min-w-0 sm:flex-1 flex-shrink-0">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-8 sm:w-10 h-8 sm:h-10 rounded-lg bg-blue-50 flex items-center justify-center">
+                            <Target className="w-4 sm:w-5 h-4 sm:h-5 text-blue-600" />
+                        </div>
+                        <span className="text-xs sm:text-sm text-neutral-500">Conversion Rate</span>
+                    </div>
+                    <p className="text-lg sm:text-2xl font-bold text-[#E22B2B]">{conversionRate}%</p>
+                    <p className="text-xs text-neutral-400 mt-1">success rate</p>
+                </div>
+            </div>
+
+            {/* Filters & Search */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="relative w-full sm:w-80">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                    <input
+                        type="text"
+                        placeholder="Search leads, customer..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2.5 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#E22B2B]/20 focus:border-[#E22B2B]"
+                    />
+                </div>
+                <div className="flex items-center gap-3">
+                    {/* Date Range Dropdown */}
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowDateDropdown(!showDateDropdown)}
+                            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-neutral-200 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+                        >
+                            Last {dateRange} Days
+                            <ChevronDown className="w-4 h-4" />
+                        </button>
+                        {showDateDropdown && (
+                            <div className="absolute top-full left-0 mt-1 w-40 bg-white border border-neutral-200 rounded-lg shadow-lg z-10">
+                                {['7', '14', '30', '90'].map(days => (
+                                    <button
+                                        key={days}
+                                        onClick={() => { setDateRange(days); setShowDateDropdown(false); }}
+                                        className={`w-full px-4 py-2 text-left text-sm hover:bg-neutral-50 ${dateRange === days ? 'text-[#E22B2B] font-medium' : 'text-neutral-700'}`}
+                                    >
+                                        Last {days} Days
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
-                    <div className="flex flex-wrap gap-3 items-center">
-                        {/* Date Range Dropdown */}
-                        <div className="relative">
-                            <button
-                                onClick={() => setShowDateDropdown(!showDateDropdown)}
-                                className="flex items-center gap-2 px-4 py-2.5 border border-neutral-200 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition-colors"
-                            >
-                                <Calendar className="w-4 h-4" />
-                                Last {dateRange} Days
-                                <ChevronDown className="w-4 h-4" />
-                            </button>
-                            {showDateDropdown && (
-                                <div className="absolute top-full left-0 mt-1 w-40 bg-white border border-neutral-200 rounded-lg shadow-lg z-10">
-                                    {['7', '14', '30', '90'].map(days => (
-                                        <button
-                                            key={days}
-                                            onClick={() => { setDateRange(days); setShowDateDropdown(false); }}
-                                            className={`w-full px-4 py-2 text-left text-sm hover:bg-neutral-50 ${dateRange === days ? 'text-[#E22B2B] font-medium' : 'text-neutral-700'}`}
-                                        >
-                                            Last {days} Days
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Status Filter */}
-                        <div className="relative">
-                            <button
-                                onClick={() => setShowStatusDropdown(!showStatusDropdown)}
-                                className="flex items-center gap-2 px-4 py-2.5 border border-neutral-200 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition-colors"
-                            >
-                                {statusFilter === 'all' ? 'All Statuses' : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
-                                <ChevronDown className="w-4 h-4" />
-                            </button>
-                            {showStatusDropdown && (
-                                <div className="absolute top-full right-0 mt-1 w-40 bg-white border border-neutral-200 rounded-lg shadow-lg z-10">
-                                    {['all', 'pending', 'recovered', 'expired'].map(status => (
-                                        <button
-                                            key={status}
-                                            onClick={() => { setStatusFilter(status); setShowStatusDropdown(false); }}
-                                            className={`w-full px-4 py-2 text-left text-sm hover:bg-neutral-50 ${statusFilter === status ? 'text-[#E22B2B] font-medium' : 'text-neutral-700'}`}
-                                        >
-                                            {status === 'all' ? 'All Statuses' : status.charAt(0).toUpperCase() + status.slice(1)}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Export Button */}
-                        <button className="flex items-center gap-2 px-4 py-2.5 border border-neutral-200 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition-colors">
-                            <Download className="w-4 h-4" />
-                            Export
+                    {/* Status Filter */}
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowStatusDropdown(!showStatusDropdown)}
+                            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-neutral-200 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+                        >
+                            {statusFilter === 'all' ? 'All Statuses' : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
+                            <ChevronDown className="w-4 h-4" />
                         </button>
+                        {showStatusDropdown && (
+                            <div className="absolute top-full right-0 mt-1 w-40 bg-white border border-neutral-200 rounded-lg shadow-lg z-10">
+                                {['all', 'pending', 'recovered', 'expired'].map(status => (
+                                    <button
+                                        key={status}
+                                        onClick={() => { setStatusFilter(status); setShowStatusDropdown(false); }}
+                                        className={`w-full px-4 py-2 text-left text-sm hover:bg-neutral-50 ${statusFilter === status ? 'text-[#E22B2B] font-medium' : 'text-neutral-700'}`}
+                                    >
+                                        {status === 'all' ? 'All Statuses' : status.charAt(0).toUpperCase() + status.slice(1)}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
