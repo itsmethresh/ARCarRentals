@@ -7,6 +7,8 @@ import {
   HowToRentPage,
   AboutUsPage,
   ContactUsPage,
+  PrivacyPolicyPage,
+  TermsOfServicePage,
   LoginPage,
   AdminDashboardPage,
   AdminFleetPage,
@@ -18,6 +20,7 @@ import {
 } from '@pages/index';
 import { BookingPage, CheckoutPage, ReceiptSubmittedPage } from '@pages/BrowseVehicles';
 import { TrackBookingPage } from '@pages/TrackBookingPage';
+import { TrackBookingLookupPage } from '@pages/TrackBookingLookupPage';
 import { BookingRouteGuard } from '@components/BookingRouteGuard';
 import { ProtectedRoute } from '@components/ProtectedRoute';
 
@@ -68,6 +71,10 @@ export const routes: RouteObject[] = [
     element: <MainLayout><TrackBookingPage /></MainLayout>,
   },
   {
+    path: '/track-booking',
+    element: <MainLayout><TrackBookingLookupPage /></MainLayout>,
+  },
+  {
     path: '/track/:reference',
     element: <MainLayout><TrackBookingPage /></MainLayout>,
   },
@@ -82,6 +89,14 @@ export const routes: RouteObject[] = [
   {
     path: '/contact',
     element: <MainLayout><ContactUsPage /></MainLayout>,
+  },
+  {
+    path: '/privacy-policy',
+    element: <MainLayout><PrivacyPolicyPage /></MainLayout>,
+  },
+  {
+    path: '/terms-of-service',
+    element: <MainLayout><TermsOfServicePage /></MainLayout>,
   },
   {
     path: '/sidebar-demo',

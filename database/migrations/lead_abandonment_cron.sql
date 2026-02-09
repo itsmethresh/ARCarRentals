@@ -11,8 +11,12 @@
 -- - Run this in Supabase SQL Editor
 -- ============================================
 
--- Enable pg_cron extension (if not already enabled)
--- CREATE EXTENSION IF NOT EXISTS pg_cron;
+-- Enable pg_cron and pg_net extensions (if not already enabled)
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+CREATE EXTENSION IF NOT EXISTS pg_net;
+
+-- DROP existing function first to avoid return type errors
+DROP FUNCTION IF EXISTS process_abandoned_leads();
 
 -- ============================================
 -- FUNCTION: Process abandoned leads
@@ -20,52 +24,83 @@
 CREATE OR REPLACE FUNCTION process_abandoned_leads()
 RETURNS TABLE(
   lead_id UUID,
-  email VARCHAR,
-  lead_name VARCHAR,
-  vehicle_name TEXT,
-  pickup_date DATE,
-  return_date DATE,
-  estimated_price NUMERIC
+  result_email VARCHAR,
+  result_lead_name VARCHAR,
+  result_status INT
 ) AS $$
 DECLARE
-  affected_count INT;
+  abandoned_lead RECORD;
+  request_id INT;
+  payload JSONB;
 BEGIN
-  -- Find and update PENDING leads older than 60 minutes
-  -- that haven't been recovered
-  WITH abandoned AS (
+  -- 1. Identify and update abandoned leads using a temporary table or CTE approach that works with FOR loop
+  -- We'll use a slightly different approach: UPDATE and store in temp table, then loop
+  
+  CREATE TEMP TABLE updated_leads AS
+  WITH updated_rows AS (
     UPDATE abandoned_leads
     SET 
       status = 'abandoned',
       automation_status = 'sent',
       automation_sent_at = NOW()
     WHERE 
-      status = 'pending'
+      abandoned_leads.status = 'pending'
       AND recovered_booking_id IS NULL
-      AND created_at < NOW() - INTERVAL '60 minutes'
+      AND created_at < NOW() - INTERVAL '2 minutes' -- Testing: 2 mins
       AND automation_status = 'not_sent'
-    RETURNING *
+    RETURNING id, email, lead_name, vehicle_id, pickup_date, return_date, estimated_price
   )
-  SELECT COUNT(*) INTO affected_count FROM abandoned;
+  SELECT * FROM updated_rows;
+
+  -- 2. Loop through the updated leads
+  FOR abandoned_lead IN SELECT * FROM updated_leads
+  LOOP
+    -- Fetch vehicle name
+    DECLARE
+      v_name TEXT;
+    BEGIN
+      SELECT brand || ' ' || model INTO v_name FROM vehicles WHERE id = abandoned_lead.vehicle_id;
+      
+      -- Construct Payload
+      payload := jsonb_build_object(
+        'email', abandoned_lead.email,
+        'bookingReference', 'ABANDONED',
+        'magicLink', 'https://arcarrentalscebu.com/browsevehicles',
+        'emailType', 'abandoned_cart',
+        'abandonedCartDetails', jsonb_build_object(
+          'customerName', abandoned_lead.lead_name,
+          'vehicleName', COALESCE(v_name, 'Your Selected Vehicle'),
+          'pickupDate', abandoned_lead.pickup_date,
+          'returnDate', abandoned_lead.return_date,
+          'estimatedPrice', abandoned_lead.estimated_price,
+          'resumeLink', 'https://arcarrentalscebu.com/browsevehicles'
+        )
+      );
+
+      -- Call Edge Function
+      PERFORM net.http_post(
+        url := 'https://dnexspoyhhqflatuyxje.supabase.co/functions/v1/send-booking-email',
+        headers := jsonb_build_object(
+          'Content-Type', 'application/json',
+          'Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuZXhzcG95aGhxZmxhdHV5eGplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3NzEwNDYsImV4cCI6MjA4NTM0NzA0Nn0.XUfhz6dvVjYFx4n89MuEvteOHGIeXaCKydYSyP2KX-M'
+        ),
+        body := payload
+      );
+      
+      -- Return result
+      lead_id := abandoned_lead.id;
+      result_email := abandoned_lead.email;
+      result_lead_name := abandoned_lead.lead_name;
+      result_status := 200;
+      RETURN NEXT;
+    END;
+  END LOOP;
   
-  RAISE NOTICE 'Marked % leads as abandoned', affected_count;
+  -- Cleanup
+  DROP TABLE updated_leads;
   
-  -- Return the leads that need emails sent
-  RETURN QUERY
-  SELECT 
-    al.id,
-    al.email,
-    al.lead_name,
-    COALESCE(v.brand || ' ' || v.model, 'Your Selected Vehicle') as vehicle_name,
-    al.pickup_date,
-    al.return_date,
-    al.estimated_price
-  FROM abandoned_leads al
-  LEFT JOIN vehicles v ON al.vehicle_id = v.id
-  WHERE 
-    al.status = 'abandoned'
-    AND al.automation_status = 'sent'
-    AND al.automation_sent_at > NOW() - INTERVAL '1 minute';
 END;
+
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ============================================

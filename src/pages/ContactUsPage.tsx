@@ -56,22 +56,22 @@ export const ContactUsPage: FC = () => {
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         // Build URL parameters from preference filters
         const params = new URLSearchParams();
-        
+
         if (carType) {
             params.append('carType', carType);
         }
-        
+
         if (transmission) {
             params.append('transmission', transmission);
         }
-        
+
         if (seats) {
             params.append('seats', seats);
         }
-        
+
         // Navigate to browse vehicles page with filter parameters
         navigate(`/browsevehicles?${params.toString()}`);
     };
@@ -254,75 +254,226 @@ export const ContactUsPage: FC = () => {
                 </div>
             </section>
 
-            {/* Section 2 - CTA Section */}
-            <section className="py-24 px-6 bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900 relative overflow-hidden">
-                {/* Decorative Elements */}
-                <div className="absolute inset-0">
-                    <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#E22B2B]/20 rounded-full blur-[120px]"></div>
-                    <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-[#E22B2B]/10 rounded-full blur-[100px]"></div>
-                </div>
+            {/* Pickup & Delivery Fees Section */}
+            <section className="py-20 bg-neutral-100">
+                <div className="mx-auto w-full max-w-[1600px]" style={{ paddingInline: 'clamp(1.5rem, 3vw, 3rem)' }}>
+                    {/* Section Header */}
+                    <div className="text-center mb-12">
+                        <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">Pickup & Delivery Fees</h2>
+                        <p className="text-neutral-600 max-w-2xl mx-auto">
+                            We offer flexible delivery options to suit your schedule. Choose office pickup for free or get your car delivered to your location.
+                        </p>
+                    </div>
 
-                {/* Background Pattern */}
-                <div className="absolute inset-0 opacity-5">
-                    <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '40px 40px' }}></div>
-                </div>
-
-                <div className="max-w-[1200px] mx-auto relative z-10">
-                    <div className="text-center">
-                        {/* Badge */}
-                        <div className="inline-flex items-center gap-2 bg-[#E22B2B]/20 border border-[#E22B2B]/30 rounded-full px-4 py-2 mb-8">
-                            <span className="w-2 h-2 bg-[#E22B2B] rounded-full animate-pulse"></span>
-                            <span className="text-[#E22B2B] text-sm font-semibold">Ready When You Are</span>
+                    {/* Location Cards */}
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                        {/* Office Pickup - Most Popular */}
+                        <div className="relative bg-white rounded-xl p-6 border-2 border-[#E22B2B] shadow-sm">
+                            <div className="absolute -top-3 left-4">
+                                <span className="bg-[#E22B2B] text-white text-xs font-semibold px-3 py-1 rounded-full uppercase">
+                                    Most Popular
+                                </span>
+                            </div>
+                            <div className="flex flex-col items-center text-center pt-2">
+                                <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mb-4">
+                                    <svg className="w-6 h-6 text-[#E22B2B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                </div>
+                                <h3 className="font-semibold text-neutral-900 mb-1">Office Pickup</h3>
+                                <p className="text-neutral-500 text-xs mb-3">Visit our HQ in Lapu-Lapu</p>
+                                <p className="text-[#E22B2B] text-xl font-bold">FREE</p>
+                            </div>
                         </div>
 
-                        <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6 leading-tight">
-                            Ready to Hit the Road?
-                        </h2>
-                        <p className="text-neutral-400 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-                            Browse our premium fleet and find the perfect vehicle for your Cebu adventure. Easy booking, transparent pricing, exceptional service.
-                        </p>
+                        {/* Lapu-Lapu Area */}
+                        <div className="bg-white rounded-xl p-6 border border-neutral-200 shadow-sm">
+                            <div className="flex flex-col items-center text-center">
+                                <div className="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center mb-4">
+                                    <svg className="w-6 h-6 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                </div>
+                                <h3 className="font-semibold text-neutral-900 mb-1">Lapu-Lapu Area</h3>
+                                <p className="text-neutral-500 text-xs mb-3">Resorts & Hotels</p>
+                                <p className="text-neutral-900 text-xl font-bold">₱500</p>
+                            </div>
+                        </div>
 
-                        {/* CTA Buttons */}
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        {/* Mandaue City */}
+                        <div className="bg-white rounded-xl p-6 border border-neutral-200 shadow-sm">
+                            <div className="flex flex-col items-center text-center">
+                                <div className="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center mb-4">
+                                    <svg className="w-6 h-6 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                </div>
+                                <h3 className="font-semibold text-neutral-900 mb-1">Mandaue City</h3>
+                                <p className="text-neutral-500 text-xs mb-3">Business District</p>
+                                <p className="text-neutral-900 text-xl font-bold">₱800</p>
+                            </div>
+                        </div>
+
+                        {/* Cebu City */}
+                        <div className="bg-white rounded-xl p-6 border border-neutral-200 shadow-sm">
+                            <div className="flex flex-col items-center text-center">
+                                <div className="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center mb-4">
+                                    <svg className="w-6 h-6 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                </div>
+                                <h3 className="font-semibold text-neutral-900 mb-1">Cebu City</h3>
+                                <p className="text-neutral-500 text-xs mb-3">Pier / SM / Ayala</p>
+                                <p className="text-neutral-900 text-xl font-bold">₱1,000</p>
+                            </div>
+                        </div>
+
+                        {/* Talisay City */}
+                        <div className="bg-white rounded-xl p-6 border border-neutral-200 shadow-sm">
+                            <div className="flex flex-col items-center text-center">
+                                <div className="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center mb-4">
+                                    <svg className="w-6 h-6 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                </div>
+                                <h3 className="font-semibold text-neutral-900 mb-1">Talisay City</h3>
+                                <p className="text-neutral-500 text-xs mb-3">South Area</p>
+                                <p className="text-neutral-900 text-xl font-bold">₱1,500</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Self-Drive Requirements Section */}
+            <section className="py-20 bg-white">
+                <div className="mx-auto w-full max-w-[1600px]" style={{ paddingInline: 'clamp(1.5rem, 3vw, 3rem)' }}>
+                    {/* Section Header */}
+                    <div className="text-center mb-12">
+                        <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">Self-Drive Requirements</h2>
+                        <p className="text-neutral-600 max-w-2xl mx-auto">
+                            Renting a car is simple. Just prepare these three things for a smooth handover process.
+                        </p>
+                    </div>
+
+                    {/* Requirements Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {/* Driver's License */}
+                        <div className="bg-white rounded-xl p-8 border border-neutral-200 shadow-sm border-t-4 border-t-[#E22B2B]">
+                            <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center mb-6">
+                                <svg className="w-6 h-6 text-[#E22B2B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                                </svg>
+                            </div>
+                            <h3 className="text-xl font-bold text-neutral-900 mb-3">Driver's License</h3>
+                            <p className="text-neutral-600 text-sm leading-relaxed mb-4">
+                                A valid professional or non-professional driver's license. Foreign licenses are accepted for up to 90 days from arrival.
+                            </p>
+                            <p className="text-[#E22B2B] text-sm font-medium flex items-center gap-2">
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                </svg>
+                                Must be valid & original
+                            </p>
+                        </div>
+
+                        {/* Valid ID */}
+                        <div className="bg-white rounded-xl p-8 border border-neutral-200 shadow-sm border-t-4 border-t-[#E22B2B]">
+                            <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center mb-6">
+                                <svg className="w-6 h-6 text-[#E22B2B]" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 11c0 3.517-1.009 6.799-2.753 9.571l-1.518-1.057A14.18 14.18 0 0010 11V8.414c1.262-.097 2.475-.35 3.615-.744l-.706-1.875A12.94 12.94 0 0110 6.28V4h2c0 .266-.017.528-.05.787l1.963.325C13.97 4.752 14 4.378 14 4V2h-4v4.28a15.05 15.05 0 01-4 0V2H2v2c0 .378.03.752.087 1.112L4.05 4.787A10.05 10.05 0 014 4h2v2.28a12.94 12.94 0 01-2.909.536l-.706 1.875A15.027 15.027 0 006 8.414V11c0 3.517 1.009 6.799 2.753 9.571L7.235 21.63a16.18 16.18 0 01-3.069-8.013L2.1 13.252a18.2 18.2 0 003.31 8.765L4 23h4l-.6-1.2a16.18 16.18 0 004.6-11.8v-.586A10.03 10.03 0 0012 11zm0-11c5.523 0 10 4.477 10 10a9.959 9.959 0 01-1.793 5.707l-1.424-1.424A7.963 7.963 0 0020 10c0-4.411-3.589-8-8-8S4 5.589 4 10c0 1.626.486 3.137 1.317 4.4L3.893 15.824A9.959 9.959 0 012 10C2 4.477 6.477 0 12 0z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-xl font-bold text-neutral-900 mb-3">One (1) Valid ID</h3>
+                            <p className="text-neutral-600 text-sm leading-relaxed mb-4">
+                                Government-issued ID such as Passport, SSS, or Voter's ID for verification purposes. We will take a photo for our records.
+                            </p>
+                            <p className="text-[#E22B2B] text-sm font-medium flex items-center gap-2">
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                </svg>
+                                Govt. issued
+                            </p>
+                        </div>
+
+                        {/* Security Deposit */}
+                        <div className="bg-white rounded-xl p-8 border border-neutral-200 shadow-sm border-t-4 border-t-[#E22B2B]">
+                            <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center mb-6">
+                                <svg className="w-6 h-6 text-[#E22B2B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-xl font-bold text-neutral-900 mb-3">Security Deposit</h3>
+                            <p className="text-neutral-600 text-sm leading-relaxed mb-4">
+                                A refundable cash security deposit of ₱3,000 - ₱5,000 depending on the vehicle type. This is returned upon safe return of the car.
+                            </p>
+                            <p className="text-[#E22B2B] text-sm font-medium flex items-center gap-2">
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                </svg>
+                                Fully Refundable
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Find Us - Google Maps Section */}
+            <section className="py-20 px-6 bg-neutral-50">
+                <div className="max-w-[1600px] mx-auto">
+                    {/* Section Header */}
+                    <div className="text-center mb-12">
+                        <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">Find Us</h2>
+                        <p className="text-neutral-600 max-w-2xl mx-auto">
+                            Visit our office in Cebu City for in-person consultations and vehicle viewings.
+                        </p>
+                    </div>
+
+                    {/* Map Container */}
+                    <div className="rounded-3xl overflow-hidden h-[450px] lg:h-[500px]">
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1097.9893781772598!2d123.95057130262597!3d10.31254061844564!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33a9993cc853238d%3A0xf750bf6ab6483471!2sAR%20Car%20Rentals%20%26%20Tour%20Services%20Cebu!5e0!3m2!1sen!2sph!4v1770650571353!5m2!1sen!2sph"
+                            width="100%"
+                            height="100%"
+                            style={{ border: 0 }}
+                            allowFullScreen
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                            title="AR Car Rentals & Tour Services Cebu - Location"
+                        ></iframe>
+                    </div>
+                </div>
+            </section>
+
+            {/* Section 2 - Track Your Booking Banner */}
+            <section className="py-20 bg-neutral-50">
+                <div className="mx-auto w-full max-w-[1600px] bg-neutral-900 rounded-2xl shadow-2xl overflow-hidden relative" style={{ paddingInline: 'clamp(1.5rem, 3vw, 3rem)' }}>
+                    {/* Background Image */}
+                    <div className="absolute inset-0 bg-[url('/CCLEXOverlay.png')] bg-cover bg-center opacity-40"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent"></div>
+
+                    {/* Content */}
+                    <div className="flex flex-col md:flex-row items-center justify-between p-12 md:p-16 relative z-10 gap-10">
+                        <div className="md:max-w-xl">
+                            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Track Your Booking</h2>
+                            <p className="text-neutral-300 text-lg leading-relaxed">
+                                Already booked a vehicle? Enter your booking reference number to check the status of your reservation and view your rental details.
+                            </p>
+                        </div>
+                        <div className="flex-shrink-0">
                             <Button
                                 variant="primary"
                                 size="lg"
-                                onClick={() => navigate('/browsevehicles')}
-                                className="inline-flex items-center gap-3 bg-[#E22B2B] hover:bg-[#c82424] text-white px-10 py-5 rounded-xl font-bold text-base transition-all duration-300 hover:scale-105"
+                                onClick={() => navigate('/track-booking')}
+                                className="inline-flex items-center gap-3 bg-[#E22B2B] hover:bg-white hover:text-black text-white px-10 py-5 rounded-lg font-bold uppercase tracking-widest text-sm transition-all duration-300 shadow-xl"
                             >
-                                Browse Vehicles
+                                Track Booking
                                 <ArrowRight className="h-5 w-5" />
                             </Button>
-                            <Button
-                                variant="secondary"
-                                size="lg"
-                                onClick={() => navigate('/how-to-rent')}
-                                className="inline-flex items-center gap-3 bg-transparent hover:bg-white/10 text-white border-2 border-neutral-600 hover:border-white/30 px-10 py-5 rounded-xl font-bold text-base transition-all duration-300"
-                            >
-                                Learn How It Works
-                            </Button>
-                        </div>
-
-                        {/* Trust Indicators */}
-                        <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-neutral-500 text-sm">
-                            <div className="flex items-center gap-2">
-                                <svg className="h-5 w-5 text-[#E22B2B]" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                </svg>
-                                <span>No Hidden Fees</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <svg className="h-5 w-5 text-[#E22B2B]" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                </svg>
-                                <span>24/7 Support</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <svg className="h-5 w-5 text-[#E22B2B]" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                </svg>
-                                <span>Fully Insured</span>
-                            </div>
                         </div>
                     </div>
                 </div>

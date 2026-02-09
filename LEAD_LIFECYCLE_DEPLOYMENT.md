@@ -32,25 +32,26 @@ Deploying function send-booking-email...
 
 ---
 
-## Step 2: Create the Cron Job Function
-
-1. Go to **Supabase Dashboard** → **SQL Editor**
-2. Copy and paste the SQL from:
-   `database/migrations/lead_abandonment_cron.sql`
-3. Click **Run**
-
-This creates the `process_abandoned_leads()` function.
-
----
-
-## Step 3: Enable pg_cron Extension
+## Step 2: Enable Extensions
 
 In **SQL Editor**, run:
 
 ```sql
--- Enable pg_cron (if not already enabled)
+-- Enable pg_cron and pg_net extensions
 CREATE EXTENSION IF NOT EXISTS pg_cron;
+CREATE EXTENSION IF NOT EXISTS pg_net;
 ```
+
+---
+
+## Step 3: Create the Cron Job Function
+
+1. Go to **Supabase Dashboard** → **SQL Editor**
+2. Copy and paste the **UPDATED** SQL from:
+   `database/migrations/lead_abandonment_cron.sql`
+3. Click **Run**
+
+This creates the `process_abandoned_leads()` function which now **automatically triggers emails**.
 
 ---
 

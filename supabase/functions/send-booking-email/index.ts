@@ -930,15 +930,21 @@ const getAbandonedCartEmailHTML = (
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="x-apple-disable-message-reformatting">
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
   <title>Complete Your Booking - AR Car Rentals</title>
   <style>
+    :root {
+      color-scheme: light;
+      supported-color-schemes: light;
+    }
     @media only screen and (max-width: 600px) {
       .container { width: 100% !important; }
       .content { padding: 24px !important; }
     }
   </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5; -webkit-font-smoothing: antialiased;">
   <!-- Preheader text -->
   <div style="display: none; max-height: 0; overflow: hidden; opacity: 0;">
     Your ${vehicleName} is waiting! Complete your booking now.
@@ -947,7 +953,7 @@ const getAbandonedCartEmailHTML = (
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 20px 0;">
     <tr>
       <td align="center">
-        <table class="container" width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);">
+        <table class="container" width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff !important; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);">
           
           ${getHeroBanner()}
           
@@ -956,39 +962,39 @@ const getAbandonedCartEmailHTML = (
             <td class="content" style="padding: 40px 32px;">
               
               <!-- Greeting -->
-              <h1 style="margin: 0 0 16px; color: #171717; font-size: 28px; font-weight: 700; text-align: center; line-height: 1.3;">
+              <h1 style="margin: 0 0 16px; color: #171717 !important; font-size: 28px; font-weight: 700; text-align: center; line-height: 1.3;">
                 Hi ${customerName}! 👋
               </h1>
-              <p style="margin: 0 0 24px; color: #737373; font-size: 16px; text-align: center; line-height: 1.6;">
+              <p style="margin: 0 0 24px; color: #4B5563 !important; font-size: 16px; text-align: center; line-height: 1.6;">
                 We noticed you didn't complete your booking. Your ${vehicleName} is still available!
               </p>
               
               <!-- Vehicle Card -->
-              <div style="background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%); border: 1px solid #e5e5e5; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
-                <h3 style="margin: 0 0 16px; color: #171717; font-size: 18px; font-weight: 600;">
+              <div style="background-color: #ffffff !important; border: 1px solid #e5e5e5; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+                <h3 style="margin: 0 0 16px; color: #171717 !important; font-size: 18px; font-weight: 600;">
                   🚗 Your Selected Vehicle
                 </h3>
-                <p style="margin: 0 0 16px; color: #E22B2B; font-size: 22px; font-weight: 700;">
+                <p style="margin: 0 0 16px; color: #E22B2B !important; font-size: 22px; font-weight: 700;">
                   ${vehicleName}
                 </p>
                 ${pickupDate && returnDate ? `
                 <div style="display: flex; gap: 16px; margin-bottom: 16px;">
                   <div style="flex: 1;">
-                    <p style="margin: 0 0 4px; color: #737373; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Pickup</p>
-                    <p style="margin: 0; color: #171717; font-size: 14px; font-weight: 500;">${pickupDate}</p>
+                    <p style="margin: 0 0 4px; color: #737373 !important; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Pickup</p>
+                    <p style="margin: 0; color: #171717 !important; font-size: 14px; font-weight: 500;">${pickupDate}</p>
                   </div>
                   <div style="flex: 1;">
-                    <p style="margin: 0 0 4px; color: #737373; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Return</p>
-                    <p style="margin: 0; color: #171717; font-size: 14px; font-weight: 500;">${returnDate}</p>
+                    <p style="margin: 0 0 4px; color: #737373 !important; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Return</p>
+                    <p style="margin: 0; color: #171717 !important; font-size: 14px; font-weight: 500;">${returnDate}</p>
                   </div>
                 </div>
                 ` : ''}
                 ${estimatedPrice ? `
-                <div style="background-color: #fef2f2; border-radius: 8px; padding: 12px; text-align: center;">
-                  <p style="margin: 0; color: #E22B2B; font-size: 24px; font-weight: 700;">
+                <div style="background-color: #fef2f2 !important; border-radius: 8px; padding: 12px; text-align: center;">
+                  <p style="margin: 0; color: #E22B2B !important; font-size: 24px; font-weight: 700;">
                     ₱${estimatedPrice.toLocaleString()}
                   </p>
-                  <p style="margin: 4px 0 0; color: #737373; font-size: 12px;">Estimated Total</p>
+                  <p style="margin: 4px 0 0; color: #737373 !important; font-size: 12px;">Estimated Total</p>
                 </div>
                 ` : ''}
               </div>

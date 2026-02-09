@@ -6,6 +6,8 @@ export { FeaturesPage } from './FeaturesPage';
 export { HowToRentPage } from './HowToRentPage';
 export { AboutUsPage } from './AboutUsPage';
 export { ContactUsPage } from './ContactUsPage';
+export { PrivacyPolicyPage } from './PrivacyPolicyPage';
+export { TermsOfServicePage } from './TermsOfServicePage';
 export { LoginPage } from './LoginPage';
 export { AdminDashboardPage } from './AdminDashboardPage';
 export { AdminFleetPage } from './AdminFleetPage';

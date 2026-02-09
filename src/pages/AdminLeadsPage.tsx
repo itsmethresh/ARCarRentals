@@ -240,8 +240,8 @@ export const AdminLeadsPage: FC = () => {
                     .order('created_at', { ascending: false });
 
                 if (error) {
-                    console.warn('Using mock data:', error.message);
-                    setLeads(MOCK_LEADS);
+                    console.warn('Error fetching leads:', error.message);
+                    setLeads([]);
                 } else if (data && data.length > 0) {
                     // Transform data to match Lead interface
                     const transformedLeads: Lead[] = data.map((lead: any) => ({
@@ -271,11 +271,12 @@ export const AdminLeadsPage: FC = () => {
                     }));
                     setLeads(transformedLeads);
                 } else {
-                    setLeads(MOCK_LEADS);
+                    // No data returned
+                    setLeads([]);
                 }
             } catch {
-                console.warn('Falling back to mock data');
-                setLeads(MOCK_LEADS);
+                console.warn('Falling back to empty state');
+                setLeads([]);
             } finally {
                 setIsLoading(false);
             }

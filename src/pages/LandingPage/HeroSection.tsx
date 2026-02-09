@@ -20,22 +20,22 @@ export const HeroSection: FC = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Build URL parameters from preference filters
     const params = new URLSearchParams();
-    
+
     if (carType) {
       params.append('carType', carType);
     }
-    
+
     if (transmission) {
       params.append('transmission', transmission);
     }
-    
+
     if (seats) {
       params.append('seats', seats);
     }
-    
+
     // Navigate to browse vehicles page with filter parameters
     navigate(`/browsevehicles?${params.toString()}`);
   };
@@ -48,7 +48,7 @@ export const HeroSection: FC = () => {
         <div className="absolute inset-0 bg-white" />
 
         {/* Layer 2: Overlay background at 30% opacity */}
-        <div 
+        <div
           className="absolute inset-0 opacity-30"
           style={{
             backgroundImage: 'url(/CCLEXOverlay.png)',
@@ -58,7 +58,7 @@ export const HeroSection: FC = () => {
         />
 
         {/* Layer 3: Slanted red gradient at bottom */}
-        <div 
+        <div
           className="absolute bottom-0 left-0 right-0"
           style={{
             height: '100px',
@@ -69,12 +69,12 @@ export const HeroSection: FC = () => {
 
         {/* Layer 4: Header text (centered) */}
         <div className="absolute inset-0 flex items-start justify-center pt-4 sm:pt-8 md:pt-16 z-10 px-4">
-          <h1 
+          <h1
             className="text-center font-extrabold leading-[100.4%] text-[22px] sm:text-4xl md:text-5xl lg:text-[67.5px]"
             style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
           >
             <span className="text-black">BEST </span>
-            <span 
+            <span
               style={{
                 background: 'linear-gradient(135deg, #FB3030 0%, #9F0303 100%)',
                 WebkitBackgroundClip: 'text',
@@ -87,7 +87,7 @@ export const HeroSection: FC = () => {
             <span className="text-black"> AND</span>
             <br />
             <span className="text-black">TOUR SERVICES IN </span>
-            <span 
+            <span
               style={{
                 background: 'linear-gradient(135deg, #FB3030 0%, #9F0303 100%)',
                 WebkitBackgroundClip: 'text',
@@ -103,9 +103,9 @@ export const HeroSection: FC = () => {
         {/* Layer 5: Hero image (top layer) - positioned to show more of the car on mobile */}
         <div className="absolute inset-0 flex items-end justify-center z-20 pointer-events-none">
           <img
-            src="/carSectionImage.png"
+            src="/fortuner.png"
             alt="Premium car"
-            className="w-[200%] sm:w-[140%] md:w-[80%] lg:w-[60%] h-auto object-contain translate-y-[5%] sm:translate-y-0"
+            className="w-[100%] sm:w-[80%] md:w-[50%] lg:w-[38%] h-auto object-contain translate-y-[5%] sm:translate-y-0"
           />
         </div>
       </div>
