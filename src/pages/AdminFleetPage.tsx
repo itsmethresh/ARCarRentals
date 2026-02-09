@@ -151,11 +151,10 @@ export const AdminFleetPage: FC = () => {
           </div>
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-[#E22B2B] text-white rounded-lg text-xs sm:text-sm font-medium hover:bg-[#c71f1f]"
+            className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 bg-[#E22B2B] text-white rounded-lg hover:bg-[#c71f1f]"
+            title="Add Vehicle"
           >
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Add Vehicle</span>
-            <span className="sm:hidden">Add</span>
+            <Plus className="w-5 h-5" />
           </button>
         </div>
 

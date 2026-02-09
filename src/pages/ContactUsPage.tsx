@@ -78,16 +78,6 @@ export const ContactUsPage: FC = () => {
 
     return (
         <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }} className="bg-white">
-            {/* Header - Centered (same as About Us) */}
-            <div className="pt-12 pb-6 text-center">
-                <h1 className="text-4xl font-bold text-neutral-900 mb-3">CONTACT US</h1>
-                <p className="text-sm">
-                    <span className="text-neutral-500">Home</span>
-                    <span className="text-neutral-400 mx-2">/</span>
-                    <span className="text-neutral-900">Contact Us</span>
-                </p>
-            </div>
-
             {/* Section 1 - Quick Booking: Form Left (30%) + Image Carousel Right (70%) */}
             <section className="pt-8 pb-12 bg-white">
                 <div className="mx-auto w-full max-w-[1600px]" style={{ paddingInline: 'clamp(1.5rem, 3vw, 3rem)' }}>
@@ -264,34 +254,7 @@ export const ContactUsPage: FC = () => {
                 </div>
             </section>
 
-            {/* Section 2 - Google Maps */}
-            <section className="py-20 px-6 bg-neutral-50">
-                <div className="max-w-[1600px] mx-auto">
-                    {/* Section Header */}
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">Find Us</h2>
-                        <p className="text-neutral-600 max-w-2xl mx-auto">
-                            Visit our office in Cebu City for in-person consultations and vehicle viewings.
-                        </p>
-                    </div>
-
-                    {/* Map Container */}
-                    <div className="rounded-3xl overflow-hidden h-[450px] lg:h-[500px]">
-                        <iframe
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d125429.46452522576!2d123.78856823266098!3d10.315699084428868!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33a999258dfc7bd5%3A0x7c7e9be8c08f2ad2!2sCebu%20City%2C%20Cebu%2C%20Philippines!5e0!3m2!1sen!2sus!4v1707357600000!5m2!1sen!2sus"
-                            width="100%"
-                            height="100%"
-                            style={{ border: 0 }}
-                            allowFullScreen
-                            loading="lazy"
-                            referrerPolicy="no-referrer-when-downgrade"
-                            title="AR Car Rentals Location - Cebu City"
-                        ></iframe>
-                    </div>
-                </div>
-            </section>
-
-            {/* Section 3 - CTA Section */}
+            {/* Section 2 - CTA Section */}
             <section className="py-24 px-6 bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900 relative overflow-hidden">
                 {/* Decorative Elements */}
                 <div className="absolute inset-0">

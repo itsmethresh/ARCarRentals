@@ -10,6 +10,7 @@ export interface Vehicle {
   fuel_type: string;
   seats: number | string;
   color?: string | null;
+  car_wash_fee?: number | null;
   price_per_day: number;
   status: 'available' | 'rented' | 'maintenance';
   image_url?: string | null;
@@ -190,7 +191,13 @@ export const vehicleService = {
         
         // Normalize category to lowercase to match CarCategory type
         const categoryName = vehicle.vehicle_categories?.name?.toLowerCase() || 'suv';
-        const validCategory = ['sedan', 'suv', 'van'].includes(categoryName) ? categoryName : 'suv';
+        // Map "multi-purpose vehicle" to "mpv"
+        let validCategory = categoryName;
+        if (categoryName === 'multi-purpose vehicle') {
+          validCategory = 'mpv';
+        } else if (!['sedan', 'suv', 'van', 'mpv'].includes(categoryName)) {
+          validCategory = 'suv';
+        }
         
         return {
           id: vehicle.id,
@@ -198,8 +205,9 @@ export const vehicleService = {
           brand: vehicle.brand,
           model: vehicle.model,
           year: new Date().getFullYear(),
-          category: validCategory as 'sedan' | 'suv' | 'van',
+          category: validCategory as 'sedan' | 'suv' | 'mpv' | 'van',
           pricePerDay: Number(vehicle.price_per_day),
+          carWashFee: vehicle.car_wash_fee || null,
           currency: 'PHP',
           seats: vehicle.seats || '5',
           transmission: (vehicle.transmission?.toLowerCase() || 'automatic') as 'automatic' | 'manual',

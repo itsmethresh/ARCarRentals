@@ -273,7 +273,7 @@ const getEmailFooter = () => `
           <strong style="color: #171717;">📧 Email:</strong> <a href="mailto:info@arcarrentals.com" style="color: #E22B2B; text-decoration: none;">info@arcarrentals.com</a>
         </p>
         <p style="margin: 0 0 20px; color: #525252; font-size: 14px;">
-          <strong style="color: #171717;">⏰ Hours:</strong> Monday - Saturday, 10:00am - 5:30pm
+          <strong style="color: #171717;">⏰ Hours:</strong> Monday - Sunday | Open 24 Hours
         </p>
         
         <div style="border-top: 1px solid #e5e5e5; padding-top: 20px; margin-top: 20px;">
@@ -590,7 +590,7 @@ const getDeclinedEmailHTML = (
                 <p style="margin: 0; color: #525252; font-size: 14px; line-height: 1.8;">
                   📞 <strong>Phone:</strong> +63 956 662 5224<br>
                   📧 <strong>Email:</strong> info@arcarrentals.com<br>
-                  ⏰ <strong>Hours:</strong> Monday - Saturday, 10:00am - 5:30pm
+                  ⏰ <strong>Hours:</strong> Monday - Sunday | Open 24 Hours
                 </p>
               </div>
 
@@ -876,7 +876,7 @@ const getRefundPendingEmailHTML = (
                 <p style="margin: 0; color: #525252; font-size: 14px; line-height: 1.8;">
                   📞 <strong>Phone:</strong> +63 956 662 5224<br>
                   📧 <strong>Email:</strong> info@arcarrentals.com<br>
-                  ⏰ <strong>Hours:</strong> Monday - Saturday, 10:00am - 5:30pm
+                  ⏰ <strong>Hours:</strong> Monday - Sunday | Open 24 Hours
                 </p>
               </div>
 

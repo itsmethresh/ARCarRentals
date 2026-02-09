@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Check,
   Lock,
-  HelpCircle,
   Calendar,
   X,
   AlertCircle,
@@ -12,8 +11,6 @@ import {
   QrCode,
   ArrowLeft,
   CheckCircle,
-  CreditCard,
-  Banknote
 } from 'lucide-react';
 import { Button } from '@/components/ui';
 import type { Car } from '@/types';
@@ -22,7 +19,6 @@ import { createSecureBooking } from '@/services/bookingSecurityService';
 
 type PaymentMethod = 'gcash';
 type PaymentType = 'pay-now' | 'pay-later';
-type PickupPaymentMethod = 'card' | 'cash';
 
 interface CheckoutState {
   vehicle: Car;
@@ -44,6 +40,7 @@ interface CheckoutState {
   pricing: {
     carBasePrice: number;
     driverCost: number;
+    carWashFee?: number;
     pickupLocationCost?: number;
     dropoffLocationCost?: number;
     totalPrice: number;
@@ -84,7 +81,6 @@ export const CheckoutPage: FC = () => {
   // Payment selection state
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('gcash');
   const [paymentType, setPaymentType] = useState<PaymentType>('pay-now');
-  const [pickupPaymentMethod, setPickupPaymentMethod] = useState<PickupPaymentMethod>('card');
 
   // Redirect if no checkout data
   useEffect(() => {
@@ -97,14 +93,15 @@ export const CheckoutPage: FC = () => {
     return null;
   }
 
-  const { vehicle, searchCriteria, pricing, bookingId } = state;
+  const { vehicle, searchCriteria, pricing, bookingId, driveOption } = state;
 
   // Calculate breakdown - driver cost is now included in total
   const rentalCost = pricing.carBasePrice;
   const pickupLocationCost = pricing.pickupLocationCost || 0;
   const dropoffLocationCost = pricing.dropoffLocationCost || 0;
   const driverCost = pricing.driverCost || 0;
-  const fullTotalAmount = rentalCost + pickupLocationCost + dropoffLocationCost + driverCost; // Driver cost now included
+  const carWashFee = driveOption === 'self-drive' ? (pricing.carWashFee || 0) : 0;
+  const fullTotalAmount = rentalCost + pickupLocationCost + dropoffLocationCost + driverCost + carWashFee;
   const amountToPay = fullTotalAmount;
   const remainingBalance = 0;
 
@@ -374,7 +371,7 @@ export const CheckoutPage: FC = () => {
                 </div>
               </div>
 
-              {/* Pay Later Section - Redesigned to match reference */}
+              {/* Pay Later Section - Streamlined */}
               {paymentType === 'pay-later' && (
                 <>
                   {/* Pay Later Info Banner */}
@@ -390,69 +387,11 @@ export const CheckoutPage: FC = () => {
                     </div>
                   </div>
 
-                  {/* Preferred Payment Method at Pickup */}
-                  <div className="mb-6">
-                    <h3 className="text-base font-semibold text-neutral-900 mb-4">Preferred Payment Method at Pickup</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      {/* Credit/Debit Card Option */}
-                      <button
-                        type="button"
-                        onClick={() => setPickupPaymentMethod('card')}
-                        className={`relative flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${pickupPaymentMethod === 'card'
-                          ? 'border-[#E22B2B] bg-white'
-                          : 'border-neutral-200 bg-white hover:border-neutral-300'
-                          }`}
-                      >
-                        <div className={`absolute top-3 left-3 w-4 h-4 rounded-full border-2 flex items-center justify-center ${pickupPaymentMethod === 'card' ? 'border-[#E22B2B]' : 'border-neutral-300'
-                          }`}>
-                          {pickupPaymentMethod === 'card' && (
-                            <div className="w-2 h-2 rounded-full bg-[#E22B2B]" />
-                          )}
-                        </div>
-                        <div className="ml-6">
-                          <p className={`text-sm font-medium ${pickupPaymentMethod === 'card' ? 'text-[#E22B2B]' : 'text-neutral-900'
-                            }`}>Credit / Debit Card</p>
-                          <p className="text-xs text-neutral-500">Visa, Mastercard, Amex</p>
-                        </div>
-                        <CreditCard className={`w-5 h-5 ml-auto ${pickupPaymentMethod === 'card' ? 'text-[#E22B2B]' : 'text-neutral-400'
-                          }`} />
-                      </button>
-
-                      {/* Cash Payment Option */}
-                      <button
-                        type="button"
-                        onClick={() => setPickupPaymentMethod('cash')}
-                        className={`relative flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${pickupPaymentMethod === 'cash'
-                          ? 'border-[#E22B2B] bg-white'
-                          : 'border-neutral-200 bg-white hover:border-neutral-300'
-                          }`}
-                      >
-                        <div className={`absolute top-3 left-3 w-4 h-4 rounded-full border-2 flex items-center justify-center ${pickupPaymentMethod === 'cash' ? 'border-[#E22B2B]' : 'border-neutral-300'
-                          }`}>
-                          {pickupPaymentMethod === 'cash' && (
-                            <div className="w-2 h-2 rounded-full bg-[#E22B2B]" />
-                          )}
-                        </div>
-                        <div className="ml-6">
-                          <p className={`text-sm font-medium ${pickupPaymentMethod === 'cash' ? 'text-[#E22B2B]' : 'text-neutral-900'
-                            }`}>Cash Payment</p>
-                          <p className="text-xs text-neutral-500">PHP Currency only</p>
-                        </div>
-                        <Banknote className={`w-5 h-5 ml-auto ${pickupPaymentMethod === 'cash' ? 'text-[#E22B2B]' : 'text-neutral-400'
-                          }`} />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Price Summary for Pay Later */}
-                  <div className="mb-6 space-y-3">
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-sm text-neutral-500">Due Now (Online)</span>
-                      <span className="text-base font-semibold text-neutral-900">₱0.00</span>
-                    </div>
-                    <div className="flex justify-between items-center py-2 border-t border-neutral-100">
-                      <span className="text-sm text-[#E22B2B] font-medium">Due at Pickup Counter</span>
-                      <span className="text-xl font-bold text-[#E22B2B]">₱{fullTotalAmount.toLocaleString()}.00</span>
+                  {/* Total to be Paid at Counter - Single Line */}
+                  <div className="mb-6 p-4 bg-neutral-50 rounded-xl border border-neutral-200">
+                    <div className="flex justify-between items-center">
+                      <span className="text-base font-semibold text-neutral-900">Total to be Paid at Counter</span>
+                      <span className="text-2xl font-bold text-[#E22B2B]">₱{fullTotalAmount.toLocaleString()}.00</span>
                     </div>
                   </div>
 
@@ -460,24 +399,49 @@ export const CheckoutPage: FC = () => {
                   <div className="pt-4 border-t border-neutral-200">
                     <h3 className="text-base font-semibold text-neutral-900 mb-4">Reservation Policy</h3>
                     <div className="space-y-3">
-                      <div className="flex items-start gap-3">
-                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-red-100 text-[#E22B2B] text-xs font-semibold flex items-center justify-center">1</span>
-                        <p className="text-sm text-neutral-600">
-                          You must present a <span className="font-semibold text-neutral-900">valid Driver's License</span> and <span className="font-semibold text-neutral-900">Government ID</span> matching the booking name upon pickup.
-                        </p>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-red-100 text-[#E22B2B] text-xs font-semibold flex items-center justify-center">2</span>
-                        <p className="text-sm text-neutral-600">
-                          A security deposit may be required at the counter (refundable upon safe return of vehicle).
-                        </p>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-red-100 text-[#E22B2B] text-xs font-semibold flex items-center justify-center">3</span>
-                        <p className="text-sm text-neutral-600">
-                          Cancellations made less than 24 hours before pickup may be subject to a fee.
-                        </p>
-                      </div>
+                      {driveOption === 'self-drive' ? (
+                        <>
+                          <div className="flex items-start gap-3">
+                            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-red-100 text-[#E22B2B] text-xs font-semibold flex items-center justify-center">1</span>
+                            <p className="text-sm text-neutral-600">
+                              <span className="font-semibold text-neutral-900">Valid Driver's License & Government ID required.</span> Both documents must match the booking name and be presented upon vehicle pickup.
+                            </p>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-red-100 text-[#E22B2B] text-xs font-semibold flex items-center justify-center">2</span>
+                            <p className="text-sm text-neutral-600">
+                              <span className="font-semibold text-neutral-900">Vehicle inspection</span> will be conducted at pickup. Please inspect the vehicle thoroughly before driving off.
+                            </p>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-red-100 text-[#E22B2B] text-xs font-semibold flex items-center justify-center">3</span>
+                            <p className="text-sm text-neutral-600">
+                              <span className="font-semibold text-neutral-900">Free cancellation</span> up to 24 hours before pickup. Cancellations within 24 hours may incur a fee.
+                            </p>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex items-start gap-3">
+                            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-red-100 text-[#E22B2B] text-xs font-semibold flex items-center justify-center">1</span>
+                            <p className="text-sm text-neutral-600">
+                              <span className="font-semibold text-neutral-900">Government ID required for verification.</span> Must match the booking name and be presented upon pickup.
+                            </p>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-red-100 text-[#E22B2B] text-xs font-semibold flex items-center justify-center">2</span>
+                            <p className="text-sm text-neutral-600">
+                              <span className="font-semibold text-neutral-900">Professional driver included.</span> Your driver will arrive on time at your pickup location.
+                            </p>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-red-100 text-[#E22B2B] text-xs font-semibold flex items-center justify-center">3</span>
+                            <p className="text-sm text-neutral-600">
+                              <span className="font-semibold text-neutral-900">Free cancellation</span> up to 24 hours before pickup. Cancellations within 24 hours may incur a fee.
+                            </p>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </>
@@ -663,7 +627,7 @@ export const CheckoutPage: FC = () => {
 
           {/* Right Column - Order Summary */}
           <div className="lg:w-[340px]">
-            <div className="bg-white rounded-xl border border-neutral-200 p-6 sticky top-32">
+            <div className="bg-white rounded-xl border border-neutral-200 p-6 sticky top-6">
               {/* Header */}
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-neutral-900">Order Summary</h3>
@@ -733,6 +697,12 @@ export const CheckoutPage: FC = () => {
                     <span className="text-neutral-900">₱{driverCost.toLocaleString()}.00</span>
                   </div>
                 )}
+                {carWashFee > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-neutral-600">Car Wash Fee</span>
+                    <span className="text-neutral-900">₱{carWashFee.toLocaleString()}.00</span>
+                  </div>
+                )}
               </div>
 
               {/* Total */}
@@ -758,13 +728,18 @@ export const CheckoutPage: FC = () => {
                 </div>
               )}
 
-              {/* Pay Later Note */}
+              {/* Pay Later Note - Trust Builder */}
               {paymentType === 'pay-later' && (
-                <div className="rounded-lg p-4 mb-6 bg-blue-50">
-                  <p className="text-sm text-blue-800 font-medium">Payment on Pickup</p>
-                  <p className="text-xs text-blue-600 mt-1">
-                    Full payment of ₱{fullTotalAmount.toLocaleString()}.00 due upon vehicle pickup
-                  </p>
+                <div className="rounded-lg p-4 mb-6 bg-green-50 border border-green-200">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm text-green-800 font-semibold">No payment needed today!</p>
+                      <p className="text-xs text-green-700 mt-1">
+                        We'll hold this {vehicle.name} for you until {formatDate(searchCriteria.pickupDate)}.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -796,14 +771,6 @@ export const CheckoutPage: FC = () => {
               <p className="text-xs text-center text-neutral-500 mt-3">
                 By proceeding, you agree to our <a href="#" className="text-[#E22B2B] hover:underline">Terms of Service</a>.
               </p>
-
-              {/* Help Link */}
-              <div className="flex items-center justify-center gap-2 mt-4 pt-4 border-t border-neutral-100">
-                <HelpCircle className="w-4 h-4 text-neutral-400" />
-                <span className="text-sm text-neutral-600">
-                  Need help? <a href="#" className="text-[#E22B2B] hover:underline">Chat with support</a>
-                </span>
-              </div>
             </div>
           </div>
         </div>

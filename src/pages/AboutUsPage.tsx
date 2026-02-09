@@ -59,16 +59,6 @@ export const AboutUsPage: FC = () => {
 
   return (
     <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }} className="bg-white">
-      {/* Header - Centered */}
-      <div className="pt-12 pb-6 text-center">
-        <h1 className="text-4xl font-bold text-neutral-900 mb-3">ABOUT US</h1>
-        <p className="text-sm">
-          <span className="text-neutral-500">Home</span>
-          <span className="text-neutral-400 mx-2">/</span>
-          <span className="text-neutral-900">About Us</span>
-        </p>
-      </div>
-
       {/* First Section - Hero Image + 3 Column Content */}
       <section className="pt-8 pb-16 bg-white">
         <div className="mx-auto w-full max-w-[1600px]" style={{ paddingInline: 'clamp(1.5rem, 3vw, 3rem)' }}>
@@ -182,8 +172,35 @@ export const AboutUsPage: FC = () => {
         </div>
       </section>
 
-      {/* Third Section - Testimonials/Reviews */}
-      <section className="py-20 bg-neutral-50">
+      {/* Third Section - Find Us (Google Maps) */}
+      <section className="py-20 px-6 bg-neutral-50">
+        <div className="max-w-[1600px] mx-auto">
+          {/* Section Header */}
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">Find Us</h2>
+            <p className="text-neutral-600 max-w-2xl mx-auto">
+              Visit our office in Cebu City for in-person consultations and vehicle viewings.
+            </p>
+          </div>
+
+          {/* Map Container */}
+          <div className="rounded-3xl overflow-hidden h-[450px] lg:h-[500px]">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1097.9893781772598!2d123.95057130262597!3d10.31254061844564!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33a9993cc853238d%3A0xf750bf6ab6483471!2sAR%20Car%20Rentals%20%26%20Tour%20Services%20Cebu!5e0!3m2!1sen!2sph!4v1770650571353!5m2!1sen!2sph"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="AR Car Rentals & Tour Services Cebu - Location"
+            ></iframe>
+          </div>
+        </div>
+      </section>
+
+      {/* Fourth Section - Testimonials/Reviews */}
+      <section className="py-20 bg-white">
         <div className="mx-auto w-full max-w-[1600px]" style={{ paddingInline: 'clamp(1.5rem, 3vw, 3rem)' }}>
           {/* Section Header */}
           <div className="text-center mb-12">
@@ -237,7 +254,7 @@ export const AboutUsPage: FC = () => {
         </div>
       </section>
 
-      {/* Fourth Section - FAQs */}
+      {/* Fifth Section - FAQs */}
       <section className="py-20 bg-white">
         <div className="mx-auto w-full max-w-[1600px]" style={{ paddingInline: 'clamp(1.5rem, 3vw, 3rem)' }}>
           {/* Section Header */}

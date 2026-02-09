@@ -28,6 +28,7 @@ const FilterSidebar: FC<{
   const carTypes = [
     { value: 'sedan', label: 'Sedan', count: allCars.filter(c => c.category === 'sedan').length },
     { value: 'suv', label: 'SUV', count: allCars.filter(c => c.category === 'suv').length },
+    { value: 'mpv', label: 'Multi-Purpose Vehicle', count: allCars.filter(c => c.category === 'mpv').length },
     { value: 'van', label: 'Van', count: allCars.filter(c => c.category === 'van').length },
   ];
 
@@ -451,7 +452,7 @@ export const BrowseVehiclesPage: FC = () => {
     };
 
     // Apply car type filter from URL
-    if (carType && (carType === 'sedan' || carType === 'suv' || carType === 'van')) {
+    if (carType && (carType === 'sedan' || carType === 'suv' || carType === 'mpv' || carType === 'van')) {
       newFilters.carTypes = [carType];
     }
 
@@ -527,6 +528,14 @@ export const BrowseVehiclesPage: FC = () => {
     return true;
   });
 
+  // Category sort order: Sedan → SUV → MPV → Van
+  const categoryOrder: Record<string, number> = {
+    'sedan': 1,
+    'suv': 2,
+    'mpv': 3,
+    'van': 4,
+  };
+
   // Sort cars
   const sortedCars = [...filteredCars].sort((a, b) => {
     switch (sortBy) {
@@ -537,7 +546,10 @@ export const BrowseVehiclesPage: FC = () => {
       case 'rating':
         return b.rating - a.rating;
       default:
-        return 0;
+        // Default: sort by category order (Sedan → SUV → MPV → Van)
+        const orderA = categoryOrder[a.category] || 99;
+        const orderB = categoryOrder[b.category] || 99;
+        return orderA - orderB;
     }
   });
 

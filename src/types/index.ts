@@ -7,6 +7,7 @@ export interface Car {
   year: number;
   category: CarCategory;
   pricePerDay: number;
+  carWashFee?: number | null;
   currency: string;
   seats: number | string;
   transmission: TransmissionType;
@@ -19,7 +20,7 @@ export interface Car {
   reviewCount: number;
 }
 
-export type CarCategory = 'sedan' | 'suv' | 'van';
+export type CarCategory = 'sedan' | 'suv' | 'mpv' | 'van';
 
 export type TransmissionType = 'automatic' | 'manual';
 

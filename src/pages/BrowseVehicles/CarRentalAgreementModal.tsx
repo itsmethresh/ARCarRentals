@@ -7,6 +7,7 @@ interface CarRentalAgreementModalProps {
   onClose: () => void;
   onAgree: () => void;
   isSelfDrive: boolean;
+  carWashFee?: number | null;
 }
 
 /**
@@ -18,6 +19,7 @@ export const CarRentalAgreementModal: FC<CarRentalAgreementModalProps> = ({
   onClose,
   onAgree,
   isSelfDrive,
+  carWashFee,
 }) => {
   const [isAgreed, setIsAgreed] = useState(false);
 
@@ -193,7 +195,7 @@ export const CarRentalAgreementModal: FC<CarRentalAgreementModalProps> = ({
                   <div className="bg-white rounded p-2 text-center border border-amber-200">
                     <p className="text-[10px] text-amber-600 uppercase font-medium">Car Wash</p>
                     <p className="text-xs text-neutral-800 font-semibold">Wash before return</p>
-                    <p className="text-[10px] text-neutral-500">or pay ₱450</p>
+                    <p className="text-[10px] text-neutral-500">or pay ₱{carWashFee?.toLocaleString() || '450'} fee</p>
                   </div>
                   <div className="bg-white rounded p-2 text-center border border-amber-200">
                     <p className="text-[10px] text-amber-600 uppercase font-medium">Payment</p>

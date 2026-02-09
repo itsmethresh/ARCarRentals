@@ -12,16 +12,15 @@ export const Footer: FC = () => {
 
   const footerLinks = {
     company: [
-      { label: 'About Us', href: '/about' },
-      { label: 'Our Fleet', href: '/fleet' },
-      { label: 'Locations', href: '/locations' },
-      { label: 'Careers', href: '/careers' },
+      { label: 'About Us', href: '/aboutus' },
+      { label: 'Our Fleet', href: '/browsevehicles' },
+      { label: 'Locations', href: '/aboutus' },
     ],
     services: [
-      { label: 'Car Rental', href: '/services/rental' },
-      { label: 'Tour Packages', href: '/services/tours' },
-      { label: 'Airport Pickup', href: '/services/airport' },
-      { label: 'Corporate Rental', href: '/services/corporate' },
+      { label: 'Car Rental' },
+      { label: 'Tour Packages' },
+      { label: 'Airport Pickup' },
+      { label: 'Corporate Rental' },
     ],
     support: [
       { label: 'FAQs', href: '/faq' },
@@ -100,13 +99,10 @@ export const Footer: FC = () => {
               <h3 className="font-semibold text-lg mb-4">Services</h3>
               <ul className="space-y-3">
                 {footerLinks.services.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      to={link.href}
-                      className="text-neutral-400 hover:text-white transition-colors text-sm"
-                    >
+                  <li key={link.label}>
+                    <span className="text-neutral-400 hover:text-white transition-colors text-sm cursor-default">
                       {link.label}
-                    </Link>
+                    </span>
                   </li>
                 ))}
               </ul>

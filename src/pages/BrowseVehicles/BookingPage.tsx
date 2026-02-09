@@ -192,8 +192,10 @@ export const BookingPage: FC = () => {
   const carBasePrice = vehicle.pricePerDay * rentalDays;
   // Driver cost is NOT included in total - paid directly to driver
   const driverCost = driveOption === 'with-driver' ? DRIVER_COST.base : 0;
+  // Car wash fee only applies for self-drive
+  const carWashFee = driveOption === 'self-drive' && vehicle.carWashFee ? vehicle.carWashFee : 0;
   const totalLocationCost = pickupLocationCost + dropoffLocationCost;
-  const totalPrice = carBasePrice + totalLocationCost; // Driver cost excluded from total
+  const totalPrice = carBasePrice + totalLocationCost + carWashFee; // Driver cost excluded from total, car wash fee included for self-drive
 
   // Format date for input display (Oct 24, 2024)
   const formatDateForSummary = (dateString: string) => {
@@ -405,6 +407,7 @@ export const BookingPage: FC = () => {
         pricing: {
           carBasePrice,
           driverCost,
+          carWashFee,
           pickupLocationCost,
           dropoffLocationCost,
           totalPrice,
@@ -888,6 +891,12 @@ export const BookingPage: FC = () => {
                     <span className="font-medium text-amber-600">₱{driverCost.toLocaleString()} (pay to driver)</span>
                   </div>
                 )}
+                {carWashFee > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-neutral-600">Car Wash Fee</span>
+                    <span className="font-medium text-neutral-900">₱{carWashFee.toLocaleString()}</span>
+                  </div>
+                )}
               </div>
 
               {/* Total */}
@@ -932,6 +941,7 @@ export const BookingPage: FC = () => {
         onClose={() => setShowAgreementModal(false)}
         onAgree={handleAgreementAccepted}
         isSelfDrive={driveOption === 'self-drive'}
+        carWashFee={vehicle.carWashFee}
       />
     </div>
   );

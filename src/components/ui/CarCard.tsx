@@ -60,6 +60,17 @@ export const CarCard: FC<CarCardProps> = ({
 }) => {
   const statusConfig = getStatusConfig(availabilityStatus, leftCount);
 
+  // Format category for display
+  const getCategoryLabel = (category: string): string => {
+    const labels: Record<string, string> = {
+      'sedan': 'Sedan',
+      'suv': 'SUV',
+      'mpv': 'Multi-Purpose Vehicle',
+      'van': 'Van',
+    };
+    return labels[category] || category;
+  };
+
   return (
     <div 
       className="bg-white rounded-[16px] border border-[#ededf2] shadow-sm hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full w-full"
@@ -72,7 +83,7 @@ export const CarCard: FC<CarCardProps> = ({
             {car.name}
           </h3>
           <span className="px-2.5 py-1 text-xs font-semibold text-white bg-[#e53935] rounded-full flex-shrink-0 whitespace-nowrap">
-            {car.category}
+            {getCategoryLabel(car.category)}
           </span>
         </div>
       </div>

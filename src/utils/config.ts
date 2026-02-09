@@ -18,7 +18,7 @@ export const config = {
   contact: {
     phone: import.meta.env.VITE_CONTACT_PHONE || '+63 956 662 5224',
     email: import.meta.env.VITE_CONTACT_EMAIL || 'info@arcarrentals.com',
-    businessHours: import.meta.env.VITE_BUSINESS_HOURS || 'Monday - Saturday 10:00am - 5:30pm',
+    businessHours: import.meta.env.VITE_BUSINESS_HOURS || 'Monday - Sunday | Open 24 Hours',
     location: import.meta.env.VITE_BUSINESS_LOCATION || 'Cebu City, Philippines',
   },
 } as const;

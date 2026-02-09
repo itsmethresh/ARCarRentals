@@ -32,6 +32,7 @@ interface VehicleFormData {
   seats: string;
   features: string;
   image_url: string;
+  car_wash_fee: string;
   price_per_day: string;
   status: 'available' | 'rented' | 'maintenance';
   is_featured: boolean;
@@ -46,6 +47,7 @@ const initialFormData: VehicleFormData = {
   seats: '5',
   features: '',
   image_url: '',
+  car_wash_fee: '',
   price_per_day: '',
   status: 'available',
   is_featured: false,
@@ -154,6 +156,7 @@ export const AddVehicleModal: FC<AddVehicleModalProps> = ({
           seats: formData.seats || '5',
           features: featuresArray,
           image_url: primaryImageUrl,
+          car_wash_fee: formData.car_wash_fee ? parseFloat(formData.car_wash_fee) : null,
           price_per_day: parseFloat(formData.price_per_day),
           status: formData.status,
           is_featured: formData.is_featured,
@@ -371,6 +374,29 @@ export const AddVehicleModal: FC<AddVehicleModalProps> = ({
                 maxImages={10}
                 disabled={isLoading}
               />
+            </div>
+
+            {/* Car Wash Fee */}
+            <div className="bg-neutral-50 border border-neutral-200 rounded-xl p-6 mb-4">
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
+                Car Wash Fee (₱) <span className="text-neutral-400 text-xs font-normal">(for self-drive)</span>
+              </label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 text-base font-medium">₱</span>
+                <input
+                  type="number"
+                  name="car_wash_fee"
+                  value={formData.car_wash_fee}
+                  onChange={handleChange}
+                  placeholder="0.00"
+                  min="0"
+                  step="50"
+                  className="w-full pl-10 pr-4 py-3 text-lg font-semibold text-neutral-900 bg-white border-2 border-neutral-300 rounded-xl focus:border-primary-500 focus:outline-none focus:ring-4 focus:ring-primary-500/20 transition-all"
+                />
+              </div>
+              <p className="text-xs text-neutral-500 mt-2">
+                Charged when customer selects self-drive option
+              </p>
             </div>
 
             {/* Price Card */}
