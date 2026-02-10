@@ -81,7 +81,7 @@ export const CarRentalAgreementModal: FC<CarRentalAgreementModalProps> = ({
                   </li>
                   <li className="flex items-start gap-1.5">
                     <span className="text-[#E22B2B] font-bold">•</span>
-                    <span>Security deposit of <strong>₱5,000</strong> required upon turnover (refundable).</span>
+                    <span>Security deposit of <strong>₱2,000</strong> required upon turnover (refundable).</span>
                   </li>
                   <li className="flex items-start gap-1.5">
                     <span className="text-[#E22B2B] font-bold">•</span>

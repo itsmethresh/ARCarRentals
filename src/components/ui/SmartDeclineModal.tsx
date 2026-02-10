@@ -94,13 +94,83 @@ export const SmartDeclineModal: FC<SmartDeclineModalProps> = ({
     }
   };
 
+  // Check if payment method is GCash
+  const isGcashPayment = booking?.payments && 
+    booking.payments.length > 0 && 
+    booking.payments[0].payment_method?.toLowerCase() === 'gcash';
+
   const handleReasonSubmit = () => {
     // If no valid payment or payment failed selected, process cancellation directly
     if (!hasValidPayment || declineReason === 'payment_failed') {
       handleCancellation();
+    } else if (isGcashPayment) {
+      // GCash payments: auto-refund without proof needed
+      handleGcashAutoRefund();
     } else {
-      // Valid payment, need refund proof
+      // Valid payment (non-GCash), need refund proof
       setStep('refund');
+    }
+  };
+
+  const handleGcashAutoRefund = async () => {
+    if (!booking) return;
+
+    setIsProcessing(true);
+    try {
+      const reasonText = getReasonText();
+      const payment = booking.payments?.[0];
+
+      // Update booking to refunded status
+      const { error: bookingError } = await supabase
+        .from('bookings')
+        .update({
+          booking_status: 'refunded',
+          cancellation_reason: reasonText,
+          refund_status: 'completed',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', booking.id);
+
+      if (bookingError) throw bookingError;
+
+      // Update payment status to refunded
+      if (payment) {
+        const { error: paymentError } = await supabase
+          .from('payments')
+          .update({
+            payment_status: 'refunded',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', payment.id);
+
+        if (paymentError) throw paymentError;
+      }
+
+      // Send refund notification email if customer info is available
+      if (booking.customers?.email) {
+        await sendBookingDeclinedEmail(
+          booking.customers.email,
+          booking.booking_reference,
+          booking.customers.full_name,
+          reasonText + '\n\nYour GCash payment will be automatically refunded to your account.',
+          undefined,
+          {
+            vehicleName: booking.vehicles ? `${booking.vehicles.brand} ${booking.vehicles.model}` : undefined,
+            totalPrice: booking.total_amount,
+          }
+        );
+      }
+
+      handleClose();
+      onDeclineComplete();
+    } catch (error) {
+      console.error('Error processing GCash refund:', error);
+      const errorMessage = error instanceof Error ? error.message : 
+        typeof error === 'object' && error !== null && 'message' in error ? 
+        (error as any).message : 'Unknown error';
+      alert(`Failed to process refund: ${errorMessage}`);
+    } finally {
+      setIsProcessing(false);
     }
   };
 

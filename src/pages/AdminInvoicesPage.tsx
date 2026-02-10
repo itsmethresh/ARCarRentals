@@ -45,6 +45,7 @@ const AdminInvoicesPage: React.FC = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [invoices, setInvoices] = useState<Invoice[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
     const [stats, setStats] = useState({
         totalRevenue: 0,
         pendingInvoices: 0,
@@ -164,6 +165,55 @@ const AdminInvoicesPage: React.FC = () => {
                 return 'bg-red-100 text-red-700 border-red-200';
             default:
                 return 'bg-neutral-100 text-neutral-700 border-neutral-200';
+        }
+    };
+
+    const handleStatusChange = async (paymentId: string, newStatus: string) => {
+        setUpdatingStatus(paymentId);
+        try {
+            const { error } = await supabase
+                .from('payments')
+                .update({ payment_status: newStatus })
+                .eq('id', paymentId);
+
+            if (error) throw error;
+
+            // Update local state
+            setInvoices(prev => prev.map(inv => 
+                inv.paymentId === paymentId 
+                    ? { ...inv, status: newStatus }
+                    : inv
+            ));
+
+            // Recalculate stats
+            const updatedInvoices = invoices.map(inv => 
+                inv.paymentId === paymentId 
+                    ? { ...inv, status: newStatus }
+                    : inv
+            );
+
+            const totalRevenue = updatedInvoices
+                .filter(inv => inv.status === 'paid' || inv.status === 'completed')
+                .reduce((sum, inv) => sum + inv.amount, 0);
+
+            const pendingCount = updatedInvoices.filter(inv => inv.status === 'pending').length;
+
+            const refundsTotal = updatedInvoices
+                .filter(inv => inv.status === 'refunded')
+                .reduce((sum, inv) => sum + inv.amount, 0);
+
+            setStats(prev => ({
+                ...prev,
+                totalRevenue,
+                pendingInvoices: pendingCount,
+                refundsIssued: refundsTotal
+            }));
+
+        } catch (error) {
+            console.error('Error updating payment status:', error);
+            alert('Failed to update payment status');
+        } finally {
+            setUpdatingStatus(null);
         }
     };
 
@@ -323,9 +373,15 @@ const AdminInvoicesPage: React.FC = () => {
 
                             {/* Status */}
                             <div className="col-span-1">
-                                <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium border uppercase ${getStatusStyles(invoice.status)}`}>
-                                    {invoice.status}
-                                </span>
+                                <select
+                                    value={invoice.status}
+                                    onChange={(e) => handleStatusChange(invoice.paymentId, e.target.value)}
+                                    disabled={updatingStatus === invoice.paymentId}
+                                    className={`px-2.5 py-1 rounded-lg text-xs font-medium border uppercase cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#E22B2B]/20 ${getStatusStyles(invoice.status)} ${updatingStatus === invoice.paymentId ? 'opacity-50 cursor-wait' : ''}`}
+                                >
+                                    <option value="pending">PENDING</option>
+                                    <option value="paid">PAID</option>
+                                </select>
                             </div>
 
                             {/* Actions */}
@@ -398,9 +454,15 @@ const AdminInvoicesPage: React.FC = () => {
                                         <p className="text-xs text-neutral-400">{invoice.id}</p>
                                     </div>
                                 </div>
-                                <span className={`px-2.5 py-1 rounded-full text-xs font-medium border uppercase ${getStatusStyles(invoice.status)}`}>
-                                    {invoice.status}
-                                </span>
+                                <select
+                                    value={invoice.status}
+                                    onChange={(e) => handleStatusChange(invoice.paymentId, e.target.value)}
+                                    disabled={updatingStatus === invoice.paymentId}
+                                    className={`px-2.5 py-1 rounded-lg text-xs font-medium border uppercase cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#E22B2B]/20 ${getStatusStyles(invoice.status)} ${updatingStatus === invoice.paymentId ? 'opacity-50 cursor-wait' : ''}`}
+                                >
+                                    <option value="pending">PENDING</option>
+                                    <option value="paid">PAID</option>
+                                </select>
                             </div>
 
                             {/* Details */}

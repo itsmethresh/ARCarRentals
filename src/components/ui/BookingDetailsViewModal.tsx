@@ -8,6 +8,7 @@ import { Button } from './Button';
 import { SmartDeclineModal } from './SmartDeclineModal';
 import { bookingService } from '@/services/adminBookingService';
 import { sendBookingConfirmedEmail } from '@/services/emailService';
+import { supabase } from '@/services/supabase';
 
 interface Customer {
   id: string;
@@ -50,7 +51,7 @@ interface Booking {
   pickup_location: string;
   pickup_time?: string;
   total_amount: number;
-  booking_status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  booking_status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'refund_pending' | 'refunded';
   created_at: string;
   customers?: Customer;
   vehicles?: Vehicle;
@@ -107,6 +108,18 @@ export const BookingDetailsViewModal: FC<BookingDetailsViewModalProps> = ({
       
       if (updateError) {
         throw new Error(updateError);
+      }
+
+      // If payment method is GCash, automatically set payment status to 'paid'
+      if (payment && payment.payment_method?.toLowerCase() === 'gcash') {
+        const { error: paymentError } = await supabase
+          .from('payments')
+          .update({ payment_status: 'paid', paid_at: new Date().toISOString() })
+          .eq('id', payment.id);
+        
+        if (paymentError) {
+          console.warn('Failed to update GCash payment status:', paymentError);
+        }
       }
 
       // Send confirmation email
@@ -619,15 +632,15 @@ export const BookingDetailsViewModal: FC<BookingDetailsViewModalProps> = ({
             </div>
           )}
 
-          {/* Payment Confirmation - Show for confirmed bookings with pending payment */}
-          {booking.booking_status === 'confirmed' && payment && payment.payment_status === 'pending' && (
+          {/* Payment Confirmation - Show for confirmed bookings with pending GCash payment */}
+          {booking.booking_status === 'confirmed' && payment && payment.payment_status === 'pending' && payment.payment_method?.toLowerCase() === 'gcash' && (
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 sm:p-6">
               <h4 className="text-sm font-semibold text-blue-900 mb-3 flex items-center gap-2">
                 <AlertCircle className="w-4 h-4" />
-                Payment Confirmation Required
+                GCash Payment Confirmation Required
               </h4>
               <p className="text-xs text-blue-800 mb-4">
-                Review the payment and confirm once verified. This will activate the booking.
+                Review the GCash payment receipt and confirm once verified. This will activate the booking.
               </p>
               <div className="flex gap-3">
                 <Button
@@ -655,7 +668,7 @@ export const BookingDetailsViewModal: FC<BookingDetailsViewModalProps> = ({
 
       {/* Footer Actions */}
       <div className="flex flex-col sm:flex-row sm:justify-between gap-3 mt-6 sm:mt-8 pt-6 border-t border-neutral-200">
-        {booking.booking_status !== 'completed' && (
+        {booking.booking_status !== 'completed' && booking.booking_status !== 'cancelled' && booking.booking_status !== 'refunded' && (
           isActiveBooking ? (
             <Button
               variant="outline"
@@ -669,7 +682,7 @@ export const BookingDetailsViewModal: FC<BookingDetailsViewModalProps> = ({
             <Button
               variant="outline"
               onClick={handleCancelBooking}
-              disabled={isAccepting || isConfirmingPayment || isCancelling || booking.booking_status === 'cancelled'}
+              disabled={isAccepting || isConfirmingPayment || isCancelling}
               className="w-full sm:w-auto px-6 border-red-600 text-red-600 hover:bg-red-50"
             >
               {isCancelling ? 'Cancelling...' : 'Cancel Booking'}

@@ -149,13 +149,6 @@ export const AdminFleetPage: FC = () => {
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-neutral-900">Fleet Management</h1>
             <p className="text-sm sm:text-base text-neutral-500 mt-1">Manage your vehicle inventory and availability.</p>
           </div>
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 bg-[#E22B2B] text-white rounded-lg hover:bg-[#c71f1f]"
-            title="Add Vehicle"
-          >
-            <Plus className="w-5 h-5" />
-          </button>
         </div>
 
         {/* Stats */}
@@ -190,36 +183,6 @@ export const AdminFleetPage: FC = () => {
               </div>
             </div>
           </div>
-          <div className="stat-card">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                <Car className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                {isLoading ? (
-                  <div className="h-8 w-12 bg-neutral-200 animate-pulse rounded" />
-                ) : (
-                  <p className="text-2xl font-bold text-blue-600">{stats?.rented || 0}</p>
-                )}
-                <p className="stat-label">Rented</p>
-              </div>
-            </div>
-          </div>
-          <div className="stat-card">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center">
-                <Settings2 className="h-5 w-5 text-yellow-600" />
-              </div>
-              <div>
-                {isLoading ? (
-                  <div className="h-8 w-12 bg-neutral-200 animate-pulse rounded" />
-                ) : (
-                  <p className="text-2xl font-bold text-yellow-600">{stats?.maintenance || 0}</p>
-                )}
-                <p className="stat-label">Maintenance</p>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Search and Filter */}
@@ -241,8 +204,6 @@ export const AdminFleetPage: FC = () => {
               >
                 <option value="all">All Status</option>
                 <option value="available">Available</option>
-                <option value="rented">Rented</option>
-                <option value="maintenance">Maintenance</option>
               </select>
               <Button variant="outline" className="gap-2">
                 <Filter className="h-4 w-4" />

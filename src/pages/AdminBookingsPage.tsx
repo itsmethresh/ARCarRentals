@@ -478,19 +478,34 @@ export const AdminBookingsPage: FC = () => {
 
     setIsDeleting(true);
     try {
-      const { error } = await supabase
+      // First, delete all related payments
+      const { error: paymentsError } = await supabase
+        .from('payments')
+        .delete()
+        .eq('booking_id', selectedBooking.id);
+
+      if (paymentsError) {
+        console.error('Error deleting payments:', paymentsError);
+        throw new Error(`Failed to delete payments: ${paymentsError.message}`);
+      }
+
+      // Then delete the booking
+      const { error: bookingError } = await supabase
         .from('bookings')
         .delete()
         .eq('id', selectedBooking.id);
 
-      if (error) throw error;
+      if (bookingError) {
+        console.error('Error deleting booking:', bookingError);
+        throw new Error(`Failed to delete booking: ${bookingError.message}`);
+      }
 
       setIsDeleteDialogOpen(false);
       setSelectedBooking(null);
       fetchBookings();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting booking:', error);
-      alert('Failed to delete booking');
+      alert(error.message || 'Failed to delete booking. Please check console for details.');
     } finally {
       setIsDeleting(false);
     }

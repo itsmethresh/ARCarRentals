@@ -1,5 +1,5 @@
 import { type FC, useState, useRef, useCallback, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import {
   Check,
   Lock,
@@ -774,7 +774,7 @@ export const CheckoutPage: FC = () => {
 
               {/* Terms */}
               <p className="text-xs text-center text-neutral-500 mt-3">
-                By proceeding, you agree to our <a href="#" className="text-[#E22B2B] hover:underline">Terms of Service</a>.
+                By proceeding, you agree to our <Link to="/terms-of-service" className="text-[#E22B2B] hover:underline">Terms of Service</Link>.
               </p>
             </div>
           </div>

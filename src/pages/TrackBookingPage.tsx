@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../services/supabase';
-import { CheckCircle2, Clock, Package, Truck, MapPin, Calendar, Users, Fuel, Mail, Phone, User, ArrowRight } from 'lucide-react';
+import { CheckCircle2, Clock, Truck, MapPin, Calendar, Users, Fuel, Mail, Phone, User, ArrowRight } from 'lucide-react';
 
 type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'refunded';
 
@@ -9,8 +9,8 @@ interface Booking {
   id: string;
   booking_reference: string;
   booking_status: BookingStatus;
-  pickup_date: string;
-  return_date: string;
+  start_date: string;
+  rental_days: number;
   pickup_location: string;
   dropoff_location?: string;
   pickup_time: string;
@@ -21,16 +21,14 @@ interface Booking {
   customer: {
     full_name: string;
     email: string;
-    phone_number: string;
+    contact_number: string;
   };
   vehicle: {
-    name: string;
-    make: string;
+    brand: string;
     model: string;
-    year: number;
     transmission: string;
-    seats: string;
-    imageUrl: string;
+    seats: string | number;
+    image_url: string;
   };
   payment: Array<{
     amount: number;
@@ -43,8 +41,7 @@ interface Booking {
 
 const STEPS = [
   { key: 'placed', label: 'Booking Placed', icon: CheckCircle2 },
-  { key: 'processing', label: 'Processing', icon: Clock },
-  { key: 'ready', label: 'Ready for Pickup', icon: Package },
+  { key: 'accepted', label: 'Booking Accepted', icon: Clock },
   { key: 'completed', label: 'Completed', icon: Truck },
 ];
 
@@ -52,7 +49,7 @@ const getStepIndex = (status: BookingStatus): number => {
   switch (status) {
     case 'pending': return 0;
     case 'confirmed': return 1;
-    case 'completed': return 3;
+    case 'completed': return 2;
     case 'cancelled': return -1;
     case 'refunded': return -1;
     default: return 0;
@@ -60,7 +57,9 @@ const getStepIndex = (status: BookingStatus): number => {
 };
 
 const formatDate = (dateStr: string, timeStr?: string) => {
+  if (!dateStr) return 'Invalid Date';
   const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return 'Invalid Date';
   const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' };
   const formattedDate = date.toLocaleDateString('en-US', options);
   if (timeStr) {
@@ -171,6 +170,15 @@ export const TrackBookingPage = () => {
   const paymentStatus = payment?.payment_type === 'downpayment'
     ? 'Partial Payment'
     : 'Paid in Full';
+
+  // Compute pickup and return dates
+  const pickupDate = new Date(booking.start_date);
+  const returnDate = new Date(booking.start_date);
+  returnDate.setDate(returnDate.getDate() + (booking.rental_days || 1));
+
+  // Vehicle name
+  const vehicleName = `${booking.vehicle.brand} ${booking.vehicle.model}`;
+
   const statusLabel = booking.booking_status === 'pending'
     ? 'PENDING CONFIRMATION'
     : booking.booking_status === 'confirmed'
@@ -274,19 +282,31 @@ export const TrackBookingPage = () => {
             {/* Vehicle Image */}
             <div className="flex-shrink-0">
               <div className="text-[10px] uppercase tracking-widest font-bold text-neutral-400 mb-2">
-                {booking.vehicle.transmission}
+                {booking.vehicle.transmission || 'N/A'}
               </div>
-              <img
-                src={booking.vehicle.imageUrl}
-                alt={booking.vehicle.name}
-                className="w-full md:w-44 h-28 object-cover rounded-xl bg-neutral-100"
-              />
+              {booking.vehicle.image_url ? (
+                <img
+                  src={booking.vehicle.image_url}
+                  alt={vehicleName}
+                  className="w-full md:w-44 h-28 object-cover rounded-xl bg-neutral-100"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/placeholder-car.png';
+                    (e.target as HTMLImageElement).onerror = null;
+                  }}
+                />
+              ) : (
+                <div className="w-full md:w-44 h-28 rounded-xl bg-neutral-100 flex items-center justify-center">
+                  <svg className="w-12 h-12 text-neutral-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                  </svg>
+                </div>
+              )}
             </div>
 
             {/* Vehicle Info */}
             <div className="flex-1">
               <div className="flex items-start justify-between mb-4">
-                <h3 className="text-xl font-bold text-neutral-900">{booking.vehicle.name}</h3>
+                <h3 className="text-xl font-bold text-neutral-900">{vehicleName}</h3>
                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${booking.drive_option === 'self-drive'
                     ? 'bg-blue-50 text-blue-600 border-blue-200'
                     : 'bg-purple-50 text-purple-600 border-purple-200'
@@ -314,7 +334,7 @@ export const TrackBookingPage = () => {
                     <div>
                       <p className="text-sm font-semibold text-neutral-800">{booking.pickup_location}</p>
                       <p className="text-xs text-neutral-400 mt-0.5">
-                        {formatDate(booking.pickup_date, booking.pickup_time)}
+                        {formatDate(pickupDate.toISOString(), booking.pickup_time)}
                       </p>
                     </div>
                   </div>
@@ -328,7 +348,7 @@ export const TrackBookingPage = () => {
                         {booking.dropoff_location || booking.pickup_location || 'Same Location'}
                       </p>
                       <p className="text-xs text-neutral-400 mt-0.5">
-                        {formatDate(booking.return_date, booking.pickup_time)}
+                        {formatDate(returnDate.toISOString(), booking.pickup_time)}
                       </p>
                     </div>
                   </div>
@@ -368,7 +388,7 @@ export const TrackBookingPage = () => {
                 </div>
                 <div>
                   <p className="text-xs text-neutral-400">Phone Number</p>
-                  <p className="text-sm font-semibold text-neutral-800">{booking.customer.phone_number}</p>
+                  <p className="text-sm font-semibold text-neutral-800">{booking.customer.contact_number || 'Not provided'}</p>
                 </div>
               </div>
             </div>

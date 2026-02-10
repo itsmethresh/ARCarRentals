@@ -1,5 +1,6 @@
 import { type FC, useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 
 // Terms of service sections for navigation
 const sections = [
@@ -21,6 +22,11 @@ const sections = [
  */
 export const TermsOfServicePage: FC = () => {
     const [activeSection, setActiveSection] = useState('acceptance');
+    const navigate = useNavigate();
+
+    const handleGoBack = () => {
+        navigate(-1);
+    };
 
     // Update active section based on scroll position
     useEffect(() => {
@@ -55,6 +61,15 @@ export const TermsOfServicePage: FC = () => {
             {/* Header Section - Minimalist */}
             <section className="border-b border-neutral-200 py-12">
                 <div className="mx-auto w-full max-w-[1200px]" style={{ paddingInline: 'clamp(1.5rem, 3vw, 3rem)' }}>
+                    {/* Back Button */}
+                    <button
+                        onClick={handleGoBack}
+                        className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-900 transition-colors mb-4"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                        Go Back
+                    </button>
+
                     {/* Breadcrumb */}
                     <nav className="flex items-center gap-2 text-sm mb-4">
                         <Link to="/" className="text-neutral-500 hover:text-neutral-900 transition-colors">

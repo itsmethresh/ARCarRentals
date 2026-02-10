@@ -804,7 +804,7 @@ export const BookingPage: FC = () => {
                       <span className="text-sm font-medium text-[#E22B2B]">₱{DRIVER_COST.base.toLocaleString()}<span className="text-neutral-400 font-normal">/{DRIVER_COST.baseHours}hrs</span></span>
                     </div>
                     <p className="text-sm text-neutral-500 mt-0.5">Professional driver for your rental period</p>
-                    <p className="text-xs text-amber-600 mt-1">Paid directly to driver (not included in total)</p>
+                    <p className="text-xs text-amber-600 mt-1">₱150 per additional hour</p>
                   </div>
                 </label>
               </div>
