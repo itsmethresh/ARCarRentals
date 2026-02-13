@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui';
 import { config } from '@utils/config';
 import type { CarCategory, TransmissionType } from '@/types';
+import { SEO } from '@/components/SEO';
+import { generateContactPageSchema, generateBreadcrumbSchema, combineSchemas } from '@/utils/seoSchemas';
 
 // Cebu scenic images for carousel
 const cebuImages = [
@@ -41,6 +43,15 @@ export const ContactUsPage: FC = () => {
     const navigate = useNavigate();
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+    // SEO structured data
+    const structuredData = combineSchemas([
+        generateContactPageSchema(),
+        generateBreadcrumbSchema([
+            { name: 'Home', url: 'https://arcarrentalscebu.com' },
+            { name: 'Contact Us', url: 'https://arcarrentalscebu.com/contact' },
+        ]),
+    ]);
+
     // Auto-rotate carousel every 5 seconds
     useEffect(() => {
         const interval = setInterval(() => {
@@ -77,7 +88,24 @@ export const ContactUsPage: FC = () => {
     };
 
     return (
-        <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }} className="bg-white">
+        <>
+            <SEO
+                title="Contact Us"
+                description="Get in touch with AR Car Rentals in Cebu, Philippines. Book your car rental, ask questions, or request a quote. Call +63 942 394 3545 or email us for fast, friendly service."
+                keywords={[
+                    'contact AR Car Rentals',
+                    'Cebu car rental contact',
+                    'book car Cebu',
+                    'rental inquiry',
+                    'customer service',
+                    'car rental booking',
+                    'contact information',
+                    'Cebu Philippines',
+                ]}
+                canonical="https://arcarrentalscebu.com/contact"
+                structuredData={structuredData}
+            />
+            <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }} className="bg-white">
             {/* Section 1 - Quick Booking: Form Left (30%) + Image Carousel Right (70%) */}
             <section className="pt-8 pb-12 bg-white">
                 <div className="mx-auto w-full max-w-[1600px]" style={{ paddingInline: 'clamp(1.5rem, 3vw, 3rem)' }}>
@@ -479,6 +507,7 @@ export const ContactUsPage: FC = () => {
                 </div>
             </section>
         </div>
+        </>
     );
 };
 

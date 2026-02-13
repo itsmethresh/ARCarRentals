@@ -1,6 +1,8 @@
 import { type FC, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { AboutUsReviewsSection } from '@/components/sections/AboutUsReviewsSection';
+import { SEO } from '@/components/SEO';
+import { generateAboutPageSchema, generateBreadcrumbSchema, generateFAQSchema, combineSchemas } from '@/utils/seoSchemas';
 
 // FAQ data
 const faqs = [
@@ -36,8 +38,35 @@ export const AboutUsPage: FC = () => {
     setOpenFaq(openFaq === index ? null : index);
   };
 
+  // SEO structured data
+  const structuredData = combineSchemas([
+    generateAboutPageSchema(),
+    generateBreadcrumbSchema([
+      { name: 'Home', url: 'https://arcarrentalscebu.com' },
+      { name: 'About Us', url: 'https://arcarrentalscebu.com/about' },
+    ]),
+    generateFAQSchema(faqs.map(faq => ({ question: faq.question, answer: faq.answer }))),
+  ]);
+
   return (
-    <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }} className="bg-white">
+    <>
+      <SEO
+        title="About Us"
+        description="Learn about AR Car Rentals, Cebu's trusted car rental company. We provide affordable, reliable vehicles with excellent service for self-drive, chauffeur service, airport transfers, and tours since 2020."
+        keywords={[
+          'about AR Car Rentals',
+          'Cebu car rental company',
+          'car rental Cebu',
+          'vehicle rental Philippines',
+          'trusted car rental',
+          'affordable rentals',
+          'professional service',
+          'tour services Cebu',
+        ]}
+        canonical="https://arcarrentalscebu.com/about"
+        structuredData={structuredData}
+      />
+      <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }} className="bg-white">
       {/* First Section - Hero Image + 3 Column Content */}
       <section className="pt-8 pb-16 bg-white">
         <div className="mx-auto w-full max-w-[1600px]" style={{ paddingInline: 'clamp(1.5rem, 3vw, 3rem)' }}>
@@ -287,6 +316,7 @@ export const AboutUsPage: FC = () => {
         </div>
       </section>
     </div>
+    </>
   );
 };
 
